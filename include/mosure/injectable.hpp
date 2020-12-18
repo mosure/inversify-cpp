@@ -1,39 +1,32 @@
 #pragma once
 
+#include <array>
 #include <type_traits>
-#include <vector>
 
 #include <mosure/symbol.hpp>
 
 
 namespace mosure::inversify {
 
-    template <typename ...Types>
+    template <class T, class ...Types>
     inline constexpr bool valid_symbols_v = std::conjunction_v<
-        std::is_same<inversify::symbol, Types>...
+        std::is_same<T, Types>...
     >;
 
-    template <class T, std::size_t = sizeof(T)>
-    std::true_type is_complete_impl(T *);
-
-    std::false_type is_complete_impl(...);
-
-    template <class T>
-    using is_complete = decltype(is_complete_impl(std::declval<T*>()));
-
-    template <typename Dep, int size>
+    template <class Dep, class Symbol>
     struct injectable {
-        inline constexpr void setTypes(inversify::symbols symbols) {
-            value = symbols;
-        }
+        using value = Dep;
+        using symbol_type = Symbol;
 
-        static inversify::symbols value;
+        template <class ...Types>
+        struct dependencies {
+            static_assert(valid_symbols_v<Symbol, Types...>, "Injectable symbols must be of type mosure::inversify::symbol.");
+
+            static constexpr std::array <
+                Symbol,
+                sizeof...(Types)
+            > value = {{ Types... }};
+        };
     };
-
-    // template <typename Dep, typename ...Types>
-    // void injectable(Types... types) {
-
-    //     injectable_store<Dep>::setTypes(types...);
-    // }
 
 }

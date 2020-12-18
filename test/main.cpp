@@ -6,13 +6,15 @@
 namespace inversify = mosure::inversify;
 
 class A { };
+class B { };
 
-inversify::symbol testSymbol = "testSymbol";
-//inversify::injectable<A>(testSymbol);
+using foo = inversify::symbol<void>;
+
+inversify::injectable<A, int>::dependencies<int>;
 
 
 int main() {
-    // for (const auto& symbol : inversify::injectable_store<int>::value) {
-    //     std::cout << symbol << std::endl;
-    // }
+    for (const auto& symbol : inversify::injectable<A, int>::dependencies<int>::value) {
+        std::cout << symbol << std::endl;
+    }
 }

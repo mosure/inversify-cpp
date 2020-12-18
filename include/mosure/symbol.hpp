@@ -1,14 +1,11 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
 
 namespace mosure::inversify {
 
-    template <typename T>
+    template <class T = void>
     struct symbol {
         using value = T;
-    }
+    };
 
 }
