@@ -39,10 +39,10 @@ using IFizzPtr = std::unique_ptr<IFizz>;
 ```cpp
 
 namespace types {
-    inversify::symbol foo {"Foo"};
-    inversify::symbol bar {"Bar"};
-    inversify::symbol fizz {"Fizz"};
-    inversify::symbol fizzPtr {"FizzPtr"};
+    using foo = inversify::symbol<int>;
+    using bar = inversify::symbol<double>;
+    using fizz = inversify::symbol<IFizz>;
+    using fizzPtr = inversify::symbol<IFizzPtr>;
 }
 
 ```
