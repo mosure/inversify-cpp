@@ -39,10 +39,10 @@ using IFizzPtr = std::unique_ptr<IFizz>;
 ```cpp
 
 namespace types {
-    using foo = inversify::symbol<int>;
-    using bar = inversify::symbol<double>;
-    using fizz = inversify::symbol<IFizz>;
-    using fizzPtr = inversify::symbol<IFizzPtr>;
+    inversify::Symbol foo { "Foo" };
+    inversify::Symbol bar { "Bar" };
+    inversify::Symbol fizz { "Fizz" };
+    inversify::Symbol fizzPtr { "FizzPtr" };
 }
 
 ```
@@ -58,7 +58,8 @@ struct Fizz : IFizz {
     void buzz() override;
 };
 
-inversify::injectable<Fizz>(types::foo, types::bar);
+template<> inversify::Symbols
+inversify::injectable<Fizz>::dependencies = { types::foo, types::bar };
 
 ```
 
@@ -67,7 +68,7 @@ inversify::injectable<Fizz>(types::foo, types::bar);
 
 ```cpp
 
-inversify::container container {};
+inversify::Container container {};
 
 container.bind<int>(types::foo).toConstantValue(10);
 container.bind<double>(types::bar).toDynamicValue(

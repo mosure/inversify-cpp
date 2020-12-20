@@ -1,11 +1,12 @@
 #pragma once
 
+#include <string_view>
+#include <vector>
+
 
 namespace mosure::inversify {
 
-    template <class T = void>
-    struct symbol {
-        using value = T;
-    };
+    using Symbol = std::string_view;
+    using Symbols = std::vector<symbol>;
 
 }

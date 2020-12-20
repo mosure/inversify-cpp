@@ -8,13 +8,15 @@ namespace inversify = mosure::inversify;
 class A { };
 class B { };
 
-using foo = inversify::symbol<void>;
+namespace types {
+    inversify::symbol foo { "Foo" };
+}
 
-inversify::injectable<A, int>::dependencies<int>;
-
+template<>
+inversify::symbols inversify::injectable<A>::dependencies = { types::foo };
 
 int main() {
-    for (const auto& symbol : inversify::injectable<A, int>::dependencies<int>::value) {
+    for (const auto& symbol : inversify::injectable<A>::dependencies) {
         std::cout << symbol << std::endl;
     }
 }

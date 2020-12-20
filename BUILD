@@ -4,6 +4,7 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
     name = "InversifyCpp",
     copts = [
+        "-std=c++17",
         "-pedantic-errors",
         "-Wall",
         "-Wextra",
