@@ -1,6 +1,5 @@
 #pragma once
 
-#include <any>
 #include <unordered_map>
 
 #include <mosure/binding.hpp>
@@ -20,7 +19,7 @@ namespace mosure::inversify {
         private:
             std::unordered_map<
                 inversify::Symbol,
-                std::any            // typecheck on inversify::Binding type
+                inversify::Binding
             > bindings_;
     };
 

@@ -58,8 +58,8 @@ struct Fizz : IFizz {
     void buzz() override;
 };
 
-template<> inversify::Symbols
-inversify::injectable<Fizz>::dependencies = { types::foo, types::bar };
+// template<> inversify::Symbols
+// inversify::injectable<Fizz>::dependencies = { types::foo, types::bar };
 
 ```
 
@@ -77,8 +77,19 @@ container.bind<double>(types::bar).toDynamicValue(
     }
 );
 
-// container.bind<IFizz>(types::fizz).to(Fizz).inSingletonScope();
-// container.bind<IFizzPtr>(types::fizzPtr).toPointer(Fizz);
+// container.bind<IFizz>(types::fizz).to<Fizz>().inSingletonScope();
+// container.bind<IFizzPtr>(types::fizzPtr).to<Fizz*>();
+
+container.bind<IFizz>(types::fizz).to(
+    [](inversify::Context ctx) {
+        auto foo = ctx.container.get<int>(types::foo);
+        auto bar = ctx.container.get<double>(types::bar);
+
+        Fizz fizz { foo, bar };
+
+        return fizz;
+    }
+);
 
 ```
 
