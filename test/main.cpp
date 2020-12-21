@@ -9,11 +9,11 @@ class A { };
 class B { };
 
 namespace types {
-    inversify::symbol foo { "Foo" };
+    inversify::Symbol foo { "Foo" };
 }
 
-template<>
-inversify::symbols inversify::injectable<A>::dependencies = { types::foo };
+template<> inversify::Symbols
+inversify::injectable<A>::dependencies = { types::foo };
 
 int main() {
     for (const auto& symbol : inversify::injectable<A>::dependencies) {

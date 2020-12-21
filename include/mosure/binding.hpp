@@ -7,13 +7,13 @@
 
 namespace mosure::inversify {
 
-    template <typename Interface>
-    struct Binding {
-        using value = Interface;
+    // template <typename Interface>
+    // struct Binding {
+    //     using value = Interface;
 
-        inversify::Cache cache;
-        inversify::Resolver resolver;
-        inversify::Symbol symbol;
-    };
+    //     inversify::Cache cache;
+    //     inversify::Resolver resolver;
+    //     inversify::Symbol symbol;
+    // };
 
 }

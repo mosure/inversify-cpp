@@ -77,8 +77,8 @@ container.bind<double>(types::bar).toDynamicValue(
     }
 );
 
-container.bind<IFizz>(types::fizz).to(Fizz).inSingletonScope();
-container.bind<IFizzPtr>(types::fizzPtr).toPointer(Fizz);
+// container.bind<IFizz>(types::fizz).to(Fizz).inSingletonScope();
+// container.bind<IFizzPtr>(types::fizzPtr).toPointer(Fizz);
 
 ```
 

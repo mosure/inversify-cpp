@@ -7,6 +7,6 @@
 namespace mosure::inversify {
 
     using Symbol = std::string_view;
-    using Symbols = std::vector<symbol>;
+    using Symbols = std::vector<inversify::Symbol>;
 
 }

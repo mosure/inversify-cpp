@@ -3,14 +3,14 @@
 
 namespace mosure::inversify {
 
-    template <typename Interface>
-    class Cache {
-        public:
-            Interface& getValue();
-            void setValue(Interface& value);
+    // template <typename Interface>
+    // class Cache {
+    //     public:
+    //         Interface& getValue();
+    //         void setValue(Interface& value);
 
-        private:
-            Interface& value_;
-    };
+    //     private:
+    //         Interface& value_;
+    // };
 
 }
