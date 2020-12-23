@@ -5,11 +5,11 @@
 
 namespace mosure::inversify {
 
-    template <class Dep>
-    struct injectable {
-        using value = Dep;
+    // template <class Dep>
+    // struct injectable {
+    //     using value = Dep;
 
-        static inversify::Symbols dependencies;
-    };
+    //     static inversify::Symbols dependencies;
+    // };
 
 }

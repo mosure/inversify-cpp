@@ -32,7 +32,6 @@ SOFTWARE.
 #include <string> // string
 
 #include <mosure/container.hpp>
-#include <mosure/injectable.hpp>
 #include <mosure/symbol.hpp>
 
 

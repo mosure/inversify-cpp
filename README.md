@@ -30,7 +30,7 @@ struct IFizz {
     virtual ~IFizz() = default;
 
     virtual void buzz() = 0;
-}
+};
 
 using IFizzPtr = std::unique_ptr<IFizz>;
 

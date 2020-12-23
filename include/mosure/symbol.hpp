@@ -1,12 +1,12 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 #include <vector>
 
 
 namespace mosure::inversify {
 
-    using Symbol = std::string_view;
+    using Symbol = std::string;
     using Symbols = std::vector<inversify::Symbol>;
 
 }
