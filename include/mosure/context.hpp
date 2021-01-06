@@ -6,7 +6,7 @@ namespace mosure::inversify {
     class Container;
 
     struct Context {
-        Container& container;
+        const inversify::Container& container;
     };
 
 }

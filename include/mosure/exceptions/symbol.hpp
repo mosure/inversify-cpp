@@ -1,15 +1,14 @@
 #pragma once
 
-#include <exception>
+#include <stdexcept>
+
+#include <mosure/symbol.hpp>
 
 
 namespace mosure::inversify::exceptions {
 
-    class SymbolException : public std::exception {
-        virtual const char* what() const throw()
-        {
-            return "Symbol not found.";
-        }
+    struct SymbolException : public std::runtime_error {
+        SymbolException(const inversify::Symbol& symbol) : std::runtime_error("inversify::Symbol not found: " + symbol) { }
     };
 
 }

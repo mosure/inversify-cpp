@@ -1,15 +1,14 @@
 #pragma once
 
-#include <exception>
+#include <stdexcept>
+#include <string>
 
 
 namespace mosure::inversify::exceptions {
 
-    class ResolutionException : public std::exception {
-        virtual const char* what() const throw()
-        {
-            return "Container resolution failed.";
-        }
+    struct ResolutionException : public std::runtime_error {
+        ResolutionException() : std::runtime_error("inversify::Container resolution failed.") { }
+        ResolutionException(std::string msg) : std::runtime_error(msg) { }
     };
 
 }
