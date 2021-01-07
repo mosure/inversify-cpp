@@ -38,6 +38,8 @@ using IFizzPtr = std::unique_ptr<IFizz>;
 
 ```
 
+#### Declare Types
+
 ```cpp
 
 namespace types {
@@ -53,13 +55,22 @@ namespace types {
 
 ```cpp
 
-struct IFizz {
-    virtual ~IFizz() = default;
+struct Fizz : IFizz {
+    Fizz(int foo, double bar)
+        :
+        foo_(foo),
+        bar_(bar)
+    { }
 
-    virtual void buzz() = 0;
+    void buzz() override {
+        std::cout << "Fizz::buzz() - foo: " << foo_ << " - bar: " << bar_ << " - counter: " << ++counter_ << std::endl;
+    }
+
+    int foo_;
+    int bar_;
+
+    int counter_ { 0 };
 };
-
-using IFizzPtr = std::shared_ptr<IFizz>;
 
 ```
 
