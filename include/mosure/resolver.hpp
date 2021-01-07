@@ -12,7 +12,7 @@ namespace mosure::inversify {
     template <typename T>
     class Resolver {
         public:
-            virtual T resolve(const inversify::Context&) const = 0;
+            virtual T resolve(const inversify::Context&) = 0;
     };
 
     template <typename T>
@@ -23,7 +23,7 @@ namespace mosure::inversify {
         public:
             ConstantResolver(T value) : value_(value) { }
 
-            T resolve(const inversify::Context&) const override {
+            T resolve(const inversify::Context&) override {
                 return value_;
             }
 
@@ -36,7 +36,7 @@ namespace mosure::inversify {
         public:
             DynamicResolver(inversify::Factory<T> factory) : factory_(factory) { }
 
-            T resolve(const inversify::Context& context) const override {
+            T resolve(const inversify::Context& context) override {
                 return factory_(context);
             }
 
@@ -44,13 +44,25 @@ namespace mosure::inversify {
             inversify::Factory<T> factory_;
     };
 
-    // template <typename T>
-    // struct CachedResolver : Resolver<T> {
-    //     CachedResolver(Resolver<T> parent) { }
+    template <typename T>
+    class CachedResolver : public Resolver<T> {
+        public:
+            CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
 
-    //     T resolve(Context& context) const override {
+            T resolve(const inversify::Context& context) override {
+                // TODO: add lock for multi-thread support
+                if (!hasCached_) {
+                    hasCached_ = true;
+                    cached_ = parent_->resolve(context);
+                }
 
-    //     }
-    // };
+                return cached_;
+            }
+
+        private:
+            T cached_;
+            bool hasCached_ { false };
+            ResolverPtr<T> parent_;
+    };
 
 }

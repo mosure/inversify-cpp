@@ -17,36 +17,33 @@ namespace mosure::inversify {
     class BindingTo;
 
     template <typename T>
-    class BindingScope {
+    class BindingScope : public std::enable_shared_from_this<BindingScope<T>> {
         public:
-            BindingScope(BindingTo<T>& binding) : binding_(binding) { };
-
             void inSingletonScope() {
-
-            }
-
-        private:
-            inversify::BindingTo<T>& binding_;
-    };
-
-    template <typename T>
-    class BindingTo {
-        public:
-            BindingScope<T>&& toConstantValue(const T value) {
-                inversify::ResolverPtr<T> resolver = std::make_shared<inversify::ConstantResolver<T>>(value);
-                resolver_ = resolver;
-
-                BindingScope<T> scope { *this };
-                return std::move(scope);
-            }
-
-            BindingScope<T>&& toDynamicValue(inversify::Factory<T> factory) {
-                BindingScope<T> scope { *this };
-                return std::move(scope);
+                resolver_ = std::make_shared<inversify::CachedResolver<T>>(resolver_);
             }
 
         protected:
             inversify::ResolverPtr<T> resolver_;
+    };
+
+    template <typename T>
+    using BindingScopePtr = std::shared_ptr<BindingScope<T>>;
+
+    template <typename T>
+    class BindingTo : public BindingScope<T> {
+        public:
+            BindingScopePtr<T> toConstantValue(const T value) {
+                resolver_ = std::make_shared<inversify::ConstantResolver<T>>(value);
+
+                return shared_from_this();
+            }
+
+            BindingScopePtr<T> toDynamicValue(inversify::Factory<T> factory) {
+                resolver_ = std::make_shared<inversify::DynamicResolver<T>>(factory);
+
+                return shared_from_this();
+            }
     };
 
     template <typename T>

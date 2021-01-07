@@ -11,7 +11,7 @@ struct IFizz {
     virtual void buzz() = 0;
 };
 
-using IFizzPtr = std::unique_ptr<IFizz>;
+using IFizzPtr = std::shared_ptr<IFizz>;
 
 struct Fizz : IFizz {
     Fizz(int foo, double bar)
@@ -21,11 +21,13 @@ struct Fizz : IFizz {
     { }
 
     void buzz() override {
-        std::cout << "Fizz::buzz() - foo: " << foo_ << " - bar: " << bar_ << std::endl;
+        std::cout << "Fizz::buzz() - foo: " << foo_ << " - bar: " << bar_ << " - counter: " << ++counter_ << std::endl;
     }
 
     int foo_;
     int bar_;
+
+    int counter_ { 0 };
 };
 
 namespace types {
@@ -36,8 +38,6 @@ namespace types {
 
 int main() {
     try {
-        std::cout << "InversifyCpp test starting..." << std::endl;
-
         inversify::Container container {};
 
         container.bind<int>(types::foo)->toConstantValue(10);
@@ -45,26 +45,22 @@ int main() {
 
         container.bind<IFizzPtr>(types::fizz)->toDynamicValue(
             [](inversify::Context ctx) {
-                std::cout << "Dynamic binding called." << std::endl;
-
                 auto foo = ctx.container.get<int>(types::foo);
                 auto bar = ctx.container.get<double>(types::bar);
 
-                auto fizz = std::make_unique<Fizz>(foo, bar);
+                auto fizz = std::make_shared<Fizz>(foo, bar);
 
                 return fizz;
             }
-        );
+        )->inSingletonScope();
 
         auto bar = container.get<double>(types::bar);
 
-        std::cout << "Constant Dependency resolved: " << bar << std::endl;
-
         auto fizz = container.get<IFizzPtr>(types::fizz);
-
-        std::cout << "Dynamic Dependency resolved." << std::endl;
-
         fizz->buzz();
+
+        auto fizz2 = container.get<IFizzPtr>(types::fizz);
+        fizz2->buzz();
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
     }
