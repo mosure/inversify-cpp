@@ -28,18 +28,28 @@ SOFTWARE.
 
 #pragma once
 
-#include <memory> // unique_ptr
-#include <string> // string
+#include <any>              // any, any_cast
+#include <functional>       // function
+#include <memory>           // enable_shared_from_this, make_shared, shared_ptr
+#include <stdexcept>        // runtime_error
+#include <string>           // string
+#include <unordered_map>    // unordered_map
+#include <utility>          // make_pair
 
+#include <mosure/binding.hpp>
 #include <mosure/container.hpp>
+#include <mosure/context.hpp>
+#include <mosure/factory.hpp>
+#include <mosure/resolver.hpp>
 #include <mosure/symbol.hpp>
+
+#include <mosure/exceptions/resolution.hpp>
+#include <mosure/exceptions/symbol.hpp>
 
 
 /**
-    @brief namespace for Mitchell Mosure
+    @brief namespace for Mitchell Mosure - InversifyCpp
     @see https://github.com/mosure
     @since version 1.0.0
 */
-namespace mosure::inversify {
-
-}
+namespace mosure::inversify { }
