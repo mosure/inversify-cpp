@@ -33,10 +33,8 @@ namespace mosure::inversify {
     template <typename T>
     class BindingTo : public BindingScope<T> {
         public:
-            BindingScopePtr<T> toConstantValue(const T value) {
+            void toConstantValue(const T value) {
                 resolver_ = std::make_shared<inversify::ConstantResolver<T>>(value);
-
-                return shared_from_this();
             }
 
             BindingScopePtr<T> toDynamicValue(inversify::Factory<T> factory) {

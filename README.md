@@ -3,7 +3,7 @@ C++17 inversion of control and dependency injection container library.
 
 
 ## Features
-- Constant and dynamic resolvers
+- Constant, dynamic, and factory resolvers
 - Singleton and per-resolution scopes
 
 
@@ -46,6 +46,7 @@ namespace types {
     inversify::Symbol foo { "Foo" };
     inversify::Symbol bar { "Bar" };
     inversify::Symbol fizz { "Fizz" };
+    inversify::Symbol fizzFactory { "FizzFactory" };
 }
 
 ```
@@ -75,17 +76,37 @@ struct Fizz : IFizz {
 ```
 
 
-#### Creating and Configuring a Container
+#### Configure Bindings
 
 ```cpp
 
 inversify::Container container {};
 
+```
+
+##### Constant Values
+
+Constant bindings are always singletons.
+
+```cpp
+
 container.bind<int>(types::foo)->toConstantValue(10);
 container.bind<double>(types::bar)->toConstantValue(1.618);
 
+```
+
+##### Dynamic Bindings
+
+Dynamic bindings are resolved when calling `container.get...`.
+
+By default, dynamic bindings have resolution scope (e.g. each call to `container.get...` calls the factory).
+
+Singleton scope dynamic bindings cache the first resolution of the binding.
+
+```cpp
+
 container.bind<IFizzPtr>(types::fizz)->toDynamicValue(
-    [](inversify::Context ctx) {
+    [](const inversify::Context& ctx) {
         auto foo = ctx.container.get<int>(types::foo);
         auto bar = ctx.container.get<double>(types::bar);
 
@@ -97,6 +118,26 @@ container.bind<IFizzPtr>(types::fizz)->toDynamicValue(
 
 ```
 
+##### Factory Bindings
+
+Dynamic bindings can be used to resolve factory functions.
+
+```cpp
+
+container.bind<std::function<IFizzPtr()>>(types::fizzFactory)->toDynamicValue(
+    [](const inversify::Context& ctx) {
+        return [&]() {
+            auto foo = ctx.container.get<int>(types::foo);
+            auto bar = ctx.container.get<double>(types::bar);
+
+            auto fizz = std::make_shared<Fizz>(foo, bar);
+
+            return fizz;
+        };
+    }
+);
+
+```
 
 #### Resolving Dependencies
 
@@ -106,6 +147,10 @@ auto bar = container.get<double>(types::bar);
 
 auto fizz = container.get<IFizzPtr>(types::fizz);
 fizz->buzz();
+
+auto fizzFactory = container.get<std::function<IFizzPtr()>>(types::fizzFactory);
+auto anotherFizz = fizzFactory();
+anotherFizz->buzz();
 
 ```
 

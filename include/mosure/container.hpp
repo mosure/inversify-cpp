@@ -32,12 +32,12 @@ namespace mosure::inversify {
 
                 auto binding = std::any_cast<BindingPtr<T>>(rawBinding->second);
 
-                Context context { *this };
-                return binding->resolve(context);
+                return binding->resolve(context_);
             }
 
         private:
             std::unordered_map<inversify::Symbol, std::any> bindings_ { };
+            Context context_ { *this };
     };
 
 }
