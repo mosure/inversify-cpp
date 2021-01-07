@@ -54,8 +54,6 @@ int main() {
             }
         )->inSingletonScope();
 
-        auto bar = container.get<double>(types::bar);
-
         auto fizz = container.get<IFizzPtr>(types::fizz);
         fizz->buzz();
 

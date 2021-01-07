@@ -2,9 +2,8 @@
 C++ inversion of control and dependency injection container library.
 
 ## Features
-- Compile time registration
-- Compile time binding
-- Compile time resolution
+- Constant, dynamic, and factory resolvers
+- Singleton and per-resolution scopes
 
 ## Integration
 
@@ -42,7 +41,6 @@ namespace types {
     inversify::Symbol foo { "Foo" };
     inversify::Symbol bar { "Bar" };
     inversify::Symbol fizz { "Fizz" };
-    inversify::Symbol fizzPtr { "FizzPtr" };
 }
 
 ```
@@ -52,14 +50,13 @@ namespace types {
 
 ```cpp
 
-struct Fizz : IFizz {
-    Fizz(int foo, double bar);
+struct IFizz {
+    virtual ~IFizz() = default;
 
-    void buzz() override;
+    virtual void buzz() = 0;
 };
 
-// template<> inversify::Symbols
-// inversify::injectable<Fizz>::dependencies = { types::foo, types::bar };
+using IFizzPtr = std::shared_ptr<IFizz>;
 
 ```
 
@@ -70,26 +67,19 @@ struct Fizz : IFizz {
 
 inversify::Container container {};
 
-container.bind<int>(types::foo).toConstantValue(10);
-container.bind<double>(types::bar).toDynamicValue(
-    [](inversify::context) {
-        return 1.618;
-    }
-);
+container.bind<int>(types::foo)->toConstantValue(10);
+container.bind<double>(types::bar)->toConstantValue(1.618);
 
-// container.bind<IFizz>(types::fizz).to<Fizz>().inSingletonScope();
-// container.bind<IFizzPtr>(types::fizzPtr).to<Fizz*>();
-
-container.bind<IFizz>(types::fizz).to(
+container.bind<IFizzPtr>(types::fizz)->toDynamicValue(
     [](inversify::Context ctx) {
         auto foo = ctx.container.get<int>(types::foo);
         auto bar = ctx.container.get<double>(types::bar);
 
-        Fizz fizz { foo, bar };
+        auto fizz = std::make_shared<Fizz>(foo, bar);
 
         return fizz;
     }
-);
+)->inSingletonScope();
 
 ```
 
@@ -98,7 +88,9 @@ container.bind<IFizz>(types::fizz).to(
 
 ```cpp
 
-auto fizz = container.get<IFizz>(types::fizz);
-fizz.buzz();
+auto bar = container.get<double>(types::bar);
+
+auto fizz = container.get<IFizzPtr>(types::fizz);
+fizz->buzz();
 
 ```
