@@ -1,9 +1,11 @@
 # InversifyCpp
-C++ inversion of control and dependency injection container library.
+C++17 inversion of control and dependency injection container library.
+
 
 ## Features
-- Constant, dynamic, and factory resolvers
+- Constant and dynamic resolvers
 - Singleton and per-resolution scopes
+
 
 ## Integration
 
@@ -15,6 +17,7 @@ C++ inversion of control and dependency injection container library.
 namespace inversify = mosure::inversify;
 
 ```
+
 
 ### Examples
 
@@ -94,3 +97,17 @@ auto fizz = container.get<IFizzPtr>(types::fizz);
 fizz->buzz();
 
 ```
+
+
+### Running Tests
+
+Use the following to run tests:
+
+`bazel run test`
+
+> Note: depending on your compiler, `.bazelrc` may need to be modified to a supported compiler flag (e.g. `build --copt="/std:c++17"` vs `build --copt="-std=c++17"`).
+
+
+## TODOS
+- Automatic resolution of dependencies (generation of factory methods)
+- More compile-time checks
