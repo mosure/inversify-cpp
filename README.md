@@ -73,6 +73,11 @@ struct Fizz : IFizz {
     int counter_ { 0 };
 };
 
+static auto fizz = Injectable<Fizz>::inject(
+    Inject<int>(types::foo),
+    Inject<double>(types::bar)
+);
+
 ```
 
 
@@ -165,5 +170,5 @@ Use the following to run tests:
 
 
 ## TODOS
-- Automatic resolution of dependencies (generation of factory methods)
 - More compile-time checks
+- Thread safety

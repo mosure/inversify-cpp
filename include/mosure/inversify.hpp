@@ -30,16 +30,19 @@ SOFTWARE.
 
 #include <any>              // any, any_cast
 #include <functional>       // function
-#include <memory>           // enable_shared_from_this, make_shared, shared_ptr
+#include <memory>           // enable_shared_from_this, make_shared, make_unique, shared_ptr, unique_ptr
 #include <stdexcept>        // runtime_error
 #include <string>           // string
 #include <unordered_map>    // unordered_map
-#include <utility>          // make_pair
+#include <tuple>            // make_from_tuple, tuple
+#include <type_traits>      // apply, conjunction_v, enable_if_t, false_type, true_type
+#include <utility>          // forward, make_pair
 
 #include <mosure/binding.hpp>
 #include <mosure/container.hpp>
 #include <mosure/context.hpp>
 #include <mosure/factory.hpp>
+#include <mosure/injectable.hpp>
 #include <mosure/resolver.hpp>
 #include <mosure/symbol.hpp>
 

@@ -4,6 +4,7 @@
 
 #include <mosure/context.hpp>
 #include <mosure/factory.hpp>
+#include <mosure/injectable.hpp>
 #include <mosure/exceptions/resolution.hpp>
 
 
@@ -42,6 +43,53 @@ namespace mosure::inversify {
 
         private:
             inversify::Factory<T> factory_;
+    };
+
+    template <typename T, typename U, typename = void>
+    class AutoResolver;
+
+    template <typename T, typename U>
+    class AutoResolver<T, U> : public Resolver<T> {
+        public:
+            T resolve(const inversify::Context& context) override {
+                if (!inversify::Injectable<U>::factory_unique) {
+                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find factory. Is the binding correct?");
+                }
+
+                return inversify::Injectable<U>::factory(context);
+            }
+    };
+
+    // unique_ptr specialization
+    template <
+        typename T,
+        typename U
+    >
+    class AutoResolver<std::unique_ptr<T>, U> : public Resolver<std::unique_ptr<T>> {
+        public:
+            std::unique_ptr<T> resolve(const inversify::Context& context) override {
+                if (!inversify::Injectable<U>::factory_unique) {
+                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find unique_ptr factory. Is the binding correct?");
+                }
+
+                return inversify::Injectable<U>::factory_unique(context);
+            }
+    };
+
+    // shared_ptr specialization
+    template <
+        typename T,
+        typename U
+    >
+    class AutoResolver<std::shared_ptr<T>, U> : public Resolver<std::shared_ptr<T>> {
+        public:
+            std::shared_ptr<T> resolve(const inversify::Context& context) override {
+                if (!inversify::Injectable<U>::factory_shared) {
+                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find shared_ptr factory. Is the binding correct?");
+                }
+
+                return inversify::Injectable<U>::factory_shared(context);
+            }
     };
 
     template <typename T>

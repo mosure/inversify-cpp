@@ -16,6 +16,8 @@ namespace mosure::inversify {
         public:
             template <typename T>
             inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
+                static_assert(!std::is_abstract<T>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
+
                 auto binding = std::make_shared<inversify::Binding<T>>(type);
 
                 auto pair = std::make_pair(type, std::any(binding));
