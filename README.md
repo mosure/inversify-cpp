@@ -1,4 +1,7 @@
 # InversifyCpp
+![main test](https://github.com/mosure/inversifycpp/workflows/test/badge.svg)
+
+
 C++17 inversion of control and dependency injection container library.
 
 
