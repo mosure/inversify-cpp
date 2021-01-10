@@ -35,14 +35,15 @@ SOFTWARE.
 #include <string>           // string
 #include <unordered_map>    // unordered_map
 #include <tuple>            // make_from_tuple, tuple
-#include <type_traits>      // apply, conjunction_v, enable_if_t, false_type, true_type
-#include <utility>          // forward, make_pair
+#include <type_traits>      // apply, conjunction_v, false_type, true_type
+#include <utility>          // make_pair
 
 #include <mosure/binding.hpp>
 #include <mosure/container.hpp>
 #include <mosure/context.hpp>
 #include <mosure/factory.hpp>
 #include <mosure/injectable.hpp>
+#include <mosure/meta.hpp>
 #include <mosure/resolver.hpp>
 #include <mosure/symbol.hpp>
 

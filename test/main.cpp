@@ -36,7 +36,7 @@ struct Fizz : IFizz {
     }
 
     int foo_;
-    int bar_;
+    double bar_;
 
     int counter_ { 0 };
 };
