@@ -1,1 +1,3 @@
-build --copt="/std:c++17"
+build:windows --copt="/std:c++17"
+build:linux --copt="-std=c++17"
+build:macos --copt="-std=c++17"

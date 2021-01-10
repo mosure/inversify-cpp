@@ -20,4 +20,4 @@ jobs:
     - name: Add to path
       run: echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
     - name: Test
-      run: bazel run test
+      run: bazel run test --enable_platform_specific_config
