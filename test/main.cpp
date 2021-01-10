@@ -76,7 +76,7 @@ int main() {
                     return fizz;
                 };
             }
-        )->inSingletonScope();
+        );
 
         container.bind<Fizz>(types::autoFizz)->to<Fizz>();
         container.bind<IFizzUniquePtr>(types::autoFizzUnique)->to<Fizz>();

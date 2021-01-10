@@ -47,6 +47,9 @@ namespace types {
     inversify::Symbol bar { "Bar" };
     inversify::Symbol fizz { "Fizz" };
     inversify::Symbol fizzFactory { "FizzFactory" };
+    inversify::Symbol autoFizz { "AutoFizz" };
+    inversify::Symbol autoFizzUnique { "AutoFizzUnique" };
+    inversify::Symbol autoFizzShared { "AutoFizzShared" };
 }
 
 ```
@@ -73,9 +76,9 @@ struct Fizz : IFizz {
     int counter_ { 0 };
 };
 
-static auto fizz = Injectable<Fizz>::inject(
-    Inject<int>(types::foo),
-    Inject<double>(types::bar)
+static auto fizz = inversify::Injectable<Fizz>::inject(
+    inversify::Inject<int>(types::foo),
+    inversify::Inject<double>(types::bar)
 );
 
 ```
@@ -144,6 +147,21 @@ container.bind<std::function<IFizzPtr()>>(types::fizzFactory)->toDynamicValue(
 
 ```
 
+##### Automatic Bindings
+
+Dependencies can be resolved automatically using an automatic binding. Injectables are a prerequisite to the type being constructed.
+
+Automatic bindings can generate instances, unique_ptr's, and shared_ptr's of a class. The returned type is determined by the binding interface.
+
+```cpp
+
+container.bind<Fizz>(types::autoFizz)->to<Fizz>();
+container.bind<IFizzUniquePtr>(types::autoFizzUnique)->to<Fizz>();
+container.bind<IFizzSharedPtr>(types::autoFizzShared)->to<Fizz>()->inSingletonScope();
+
+```
+
+
 #### Resolving Dependencies
 
 ```cpp
@@ -156,6 +174,16 @@ fizz->buzz();
 auto fizzFactory = container.get<std::function<IFizzPtr()>>(types::fizzFactory);
 auto anotherFizz = fizzFactory();
 anotherFizz->buzz();
+
+
+auto autoFizz = container.get<Fizz>(types::autoFizz);
+autoFizz.buzz();
+
+auto autoFizzUnique = container.get<IFizzUniquePtr>(types::autoFizzUnique);
+autoFizzUnique->buzz();
+
+auto autoFizzShared = container.get<IFizzSharedPtr>(types::autoFizzShared);
+autoFizzShared->buzz();
 
 ```
 
