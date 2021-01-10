@@ -200,3 +200,7 @@ Use the following to run tests:
 ## TODOS
 - More compile-time checks
 - Thread safety
+
+## Generating `single_include` Variant
+
+Run `python ./third_party/amalgamate/amalgamate.py -c ./third_party/amalgamate/config.json -s ./` from the root of the repository.
