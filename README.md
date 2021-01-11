@@ -71,7 +71,10 @@ struct Fizz : IFizz {
     { }
 
     void buzz() override {
-        std::cout << "Fizz::buzz() - foo: " << foo_ << " - bar: " << bar_ << " - counter: " << ++counter_ << std::endl;
+        std::cout << "Fizz::buzz() - foo: " << foo_
+                  << " - bar: " << bar_
+                  << " - counter: " << ++counter_
+                  << std::endl;
     }
 
     int foo_;
