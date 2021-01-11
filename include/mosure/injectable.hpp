@@ -32,7 +32,6 @@ namespace mosure::inversify {
 
     template <typename Implementation>
     class Injectable {
-
         public:
             inline static inversify::Factory<Implementation> factory;
             inline static inversify::Factory<std::unique_ptr<Implementation>> factory_unique;
