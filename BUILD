@@ -2,7 +2,21 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 
 cc_library(
-    name = "InversifyCpp",
+    name = "catch2",
+    copts = [
+        "-std=c++11",
+    ],
+    hdrs = [
+        "third_party/catch2/catch.hpp",
+    ],
+    includes = [
+        "third_party",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "inversify",
     copts = [
         "-std=c++17",
         "-pedantic-errors",
@@ -16,19 +30,29 @@ cc_library(
     includes = [
         "include",
     ],
-    srcs = [
+    visibility = ["//visibility:public"]
+)
 
+cc_library(
+    name = "test_mocks",
+    hdrs = glob([
+        "test/mock/*.hpp",
+    ]),
+    includes = [
+        "test",
     ],
     visibility = ["//visibility:public"]
 )
 
 cc_binary(
     name = "test",
-    srcs = [
-        "test/main.cpp",
-    ],
+    srcs = glob([
+        "test/**/*.cpp",
+    ]),
     deps = [
-        ":InversifyCpp",
+        ":catch2",
+        ":inversify",
+        ":test_mocks",
     ],
     visibility = ["//visibility:public"]
 )

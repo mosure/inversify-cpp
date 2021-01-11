@@ -76,6 +76,7 @@ namespace mosure::inversify {
 
 
 #include <memory>
+#include <type_traits>
 
 // #include <mosure/context.hpp>
 
@@ -118,21 +119,6 @@ namespace mosure::inversify {
 
 }
 
-// #include <mosure/exceptions/injectable.hpp>
-
-
-#include <stdexcept>
-#include <string>
-
-
-namespace mosure::inversify::exceptions {
-
-    struct InjectableException : public std::runtime_error {
-        InjectableException(std::string msg) : std::runtime_error(msg) { }
-    };
-
-}
-
 
 
 namespace mosure::inversify {
@@ -165,11 +151,6 @@ namespace mosure::inversify {
             template <typename... Dependencies>
             inline static Injectable inject(Dependencies... dependencies) {
                 static_assert(valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Inject");
-
-                if (Injectable::registered) {
-                    throw inversify::exceptions::InjectableException("inversify::Injectable duplicate injectable registration.");
-                }
-                Injectable::registered = true;
 
                 factory = [
                     deps = std::make_tuple(dependencies...)
@@ -207,8 +188,6 @@ namespace mosure::inversify {
             }
 
         private:
-            inline static bool registered { false };
-
             template <typename Dependency>
             inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
                 auto symbol = static_cast<InjectBase>(dep).symbol;
@@ -322,6 +301,8 @@ namespace mosure::inversify {
 
     template <typename T>
     class CachedResolver : public Resolver<T> {
+        static_assert(std::is_copy_constructible_v<T>, "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?");
+
         public:
             CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
 
@@ -459,6 +440,11 @@ namespace mosure::inversify {
                 static_assert(!std::is_abstract<T>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
 
                 auto binding = std::make_shared<inversify::Binding<T>>(type);
+
+                auto lookup = bindings_.find(type);
+                if (lookup != bindings_.end()) {
+                    bindings_.erase(type);
+                }
 
                 auto pair = std::make_pair(type, std::any(binding));
                 bindings_.insert(pair);

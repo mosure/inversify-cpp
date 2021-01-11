@@ -29,9 +29,6 @@ namespace inversify = mosure::inversify;
 
 ```cpp
 
-#include <memory>
-
-
 struct IFizz {
     virtual ~IFizz() = default;
 
@@ -47,13 +44,14 @@ using IFizzPtr = std::unique_ptr<IFizz>;
 ```cpp
 
 namespace types {
-    inversify::Symbol foo { "Foo" };
-    inversify::Symbol bar { "Bar" };
-    inversify::Symbol fizz { "Fizz" };
-    inversify::Symbol fizzFactory { "FizzFactory" };
-    inversify::Symbol autoFizz { "AutoFizz" };
-    inversify::Symbol autoFizzUnique { "AutoFizzUnique" };
-    inversify::Symbol autoFizzShared { "AutoFizzShared" };
+    inline const inversify::Symbol foo { "Foo" };
+    inline const inversify::Symbol bar { "Bar" };
+    inline const inversify::Symbol fizz { "Fizz" };
+    inline const inversify::Symbol fizzFactory { "FizzFactory" };
+
+    inline const inversify::Symbol autoFizz { "AutoFizz" };
+    inline const inversify::Symbol autoFizzUnique { "AutoFizzUnique" };
+    inline const inversify::Symbol autoFizzShared { "AutoFizzShared" };
 }
 
 ```
@@ -83,7 +81,7 @@ struct Fizz : IFizz {
     int counter_ { 0 };
 };
 
-static auto fizz = inversify::Injectable<Fizz>::inject(
+inline static auto fizz = inversify::Injectable<Fizz>::inject(
     inversify::Inject<int>(types::foo),
     inversify::Inject<double>(types::bar)
 );

@@ -20,6 +20,11 @@ namespace mosure::inversify {
 
                 auto binding = std::make_shared<inversify::Binding<T>>(type);
 
+                auto lookup = bindings_.find(type);
+                if (lookup != bindings_.end()) {
+                    bindings_.erase(type);
+                }
+
                 auto pair = std::make_pair(type, std::any(binding));
                 bindings_.insert(pair);
 

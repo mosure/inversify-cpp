@@ -7,7 +7,6 @@
 #include <mosure/factory.hpp>
 #include <mosure/meta.hpp>
 #include <mosure/symbol.hpp>
-#include <mosure/exceptions/injectable.hpp>
 
 
 namespace mosure::inversify {
@@ -40,11 +39,6 @@ namespace mosure::inversify {
             template <typename... Dependencies>
             inline static Injectable inject(Dependencies... dependencies) {
                 static_assert(valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Inject");
-
-                if (Injectable::registered) {
-                    throw inversify::exceptions::InjectableException("inversify::Injectable duplicate injectable registration.");
-                }
-                Injectable::registered = true;
 
                 factory = [
                     deps = std::make_tuple(dependencies...)
@@ -82,8 +76,6 @@ namespace mosure::inversify {
             }
 
         private:
-            inline static bool registered { false };
-
             template <typename Dependency>
             inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
                 auto symbol = static_cast<InjectBase>(dep).symbol;

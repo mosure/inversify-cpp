@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 #include <mosure/context.hpp>
 #include <mosure/factory.hpp>
@@ -94,6 +95,8 @@ namespace mosure::inversify {
 
     template <typename T>
     class CachedResolver : public Resolver<T> {
+        static_assert(std::is_copy_constructible_v<T>, "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?");
+
         public:
             CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
 
