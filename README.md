@@ -204,8 +204,6 @@ Use the following to run tests:
 
 `bazel run test --enable_platform_specific_config`
 
-> Note: depending on your compiler, `.bazelrc` may need to be modified to a supported compiler flag (e.g. `build --copt="/std:c++17"` vs `build --copt="-std=c++17"`).
-
 
 ## TODOS
 - More compile-time checks
