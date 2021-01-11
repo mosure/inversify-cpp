@@ -1,10 +1,11 @@
 # InversifyCpp
 
 [![main test](https://github.com/mosure/inversifycpp/workflows/Test/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3ATest)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/mosure/inversifycpp/main/LICENSE)
-[![GitHub Releases](https://img.shields.io/github/release/mosure/inversifycpp.svg)](https://github.com/mosure/inversifycpp/releases)
+[![GitHub License](https://img.shields.io/github/license/mosure/inversifycpp)](https://raw.githubusercontent.com/mosure/inversifycpp/main/LICENSE)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/mosure/inversifycpp)](https://github.com/mosure/inversifycpp)
+[![GitHub Releases](https://img.shields.io/github/v/release/mosure/inversifycpp?include_prereleases&sort=semver)](https://github.com/mosure/inversifycpp/releases)
 [![GitHub Downloads](https://img.shields.io/github/downloads/mosure/inversifycpp/total)](https://github.com/mosure/inversifycpp/releases)
-[![GitHub Issues](https://img.shields.io/github/issues/mosure/inversifycpp.svg)](https://github.com/mosure/inversifycpp/issues)
+[![GitHub Issues](https://img.shields.io/github/issues/mosure/inversifycpp)](https://github.com/mosure/inversifycpp/issues)
 
 
 C++17 inversion of control and dependency injection container library.
