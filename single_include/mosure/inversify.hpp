@@ -374,12 +374,6 @@ namespace mosure::inversify {
 namespace mosure::inversify {
 
     template <typename T>
-    class Binding;
-
-    template <typename T>
-    class BindingTo;
-
-    template <typename T>
     class BindingScope : public std::enable_shared_from_this<BindingScope<T>> {
         public:
             void inSingletonScope() {
