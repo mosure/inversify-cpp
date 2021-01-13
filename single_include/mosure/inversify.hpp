@@ -192,7 +192,7 @@ namespace mosure::inversify {
             inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
                 auto symbol = static_cast<InjectBase>(dep).symbol;
 
-                using Interface = Dependency::value;
+                using Interface = typename Dependency::value;
                 return context.container.get<Interface>(symbol);
             }
     };
