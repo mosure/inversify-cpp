@@ -193,7 +193,7 @@ namespace mosure::inversify {
                 auto symbol = static_cast<InjectBase>(dep).symbol;
 
                 using Interface = typename Dependency::value;
-                return context.container.get<Interface>(symbol);
+                return context.container.template get<Interface>(symbol);
             }
     };
 
