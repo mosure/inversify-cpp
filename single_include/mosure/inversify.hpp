@@ -49,23 +49,10 @@ SOFTWARE.
 
 #include <functional>
 
-// #include <mosure/context.hpp>
-
-
 
 namespace mosure::inversify {
 
-    class Container;
-
-    struct Context {
-        const inversify::Container& container;
-    };
-
-}
-
-
-
-namespace mosure::inversify {
+    struct Context;
 
     template <typename T>
     using Factory = std::function<T(const inversify::Context&)>;
@@ -80,6 +67,18 @@ namespace mosure::inversify {
 
 // #include <mosure/context.hpp>
 
+
+
+namespace mosure::inversify {
+
+    class Container;
+
+    struct Context {
+        const inversify::Container& container;
+    };
+
+}
+
 // #include <mosure/factory.hpp>
 
 // #include <mosure/injectable.hpp>
@@ -88,6 +87,8 @@ namespace mosure::inversify {
 #include <memory>
 #include <tuple>
 #include <type_traits>
+
+// #include <mosure/context.hpp>
 
 // #include <mosure/factory.hpp>
 
@@ -455,12 +456,12 @@ namespace mosure::inversify {
 
             template <typename T>
             T get(const inversify::Symbol& type) const {
-                auto rawBinding = bindings_.find(type);
-                if (rawBinding == bindings_.end()) {
+                auto symbolBinding = bindings_.find(type);
+                if (symbolBinding == bindings_.end()) {
                     throw inversify::exceptions::SymbolException(type);
                 }
 
-                auto binding = std::any_cast<BindingPtr<T>>(rawBinding->second);
+                auto binding = std::any_cast<BindingPtr<T>>(symbolBinding->second);
 
                 return binding->resolve(context_);
             }
