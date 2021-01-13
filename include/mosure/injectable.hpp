@@ -4,6 +4,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include <mosure/context.hpp>
 #include <mosure/factory.hpp>
 #include <mosure/meta.hpp>
 #include <mosure/symbol.hpp>

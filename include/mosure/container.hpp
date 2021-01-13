@@ -33,12 +33,12 @@ namespace mosure::inversify {
 
             template <typename T>
             T get(const inversify::Symbol& type) const {
-                auto rawBinding = bindings_.find(type);
-                if (rawBinding == bindings_.end()) {
+                auto symbolBinding = bindings_.find(type);
+                if (symbolBinding == bindings_.end()) {
                     throw inversify::exceptions::SymbolException(type);
                 }
 
-                auto binding = std::any_cast<BindingPtr<T>>(rawBinding->second);
+                auto binding = std::any_cast<BindingPtr<T>>(symbolBinding->second);
 
                 return binding->resolve(context_);
             }
