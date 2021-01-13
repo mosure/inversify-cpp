@@ -20,14 +20,14 @@ namespace mosure::inversify {
             inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->bind<T>(type);
+                return crtpImplementation->template bind<T>(type);
             }
 
             template <typename T>
             T get(const inversify::Symbol& type) const {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->get<T>(type);
+                return crtpImplementation->template get<T>(type);
             }
     };
 
