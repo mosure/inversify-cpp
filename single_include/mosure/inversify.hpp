@@ -133,7 +133,7 @@ namespace mosure::inversify {
     struct Inject : InjectBase {
         Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
 
-        using value = typename Interface;
+        using value = Interface;
     };
 
     template <typename ...Types>
@@ -192,7 +192,8 @@ namespace mosure::inversify {
             inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
                 auto symbol = static_cast<InjectBase>(dep).symbol;
 
-                return context.container.get<typename Dependency::value>(symbol);
+                using Interface = Dependency::value;
+                return context.container.get<Interface>(symbol);
             }
     };
 
@@ -354,20 +355,20 @@ namespace mosure::inversify {
     class BindingTo : public BindingScope<T> {
         public:
             void toConstantValue(T&& value) {
-                resolver_ = std::make_shared<inversify::ConstantResolver<T>>(value);
+                this->resolver_ = std::make_shared<inversify::ConstantResolver<T>>(value);
             }
 
             BindingScopePtr<T> toDynamicValue(inversify::Factory<T> factory) {
-                resolver_ = std::make_shared<inversify::DynamicResolver<T>>(factory);
+                this->resolver_ = std::make_shared<inversify::DynamicResolver<T>>(factory);
 
-                return shared_from_this();
+                return this->shared_from_this();
             }
 
             template <typename U>
             BindingScopePtr<T> to() {
-                resolver_ = std::make_shared<inversify::AutoResolver<T, U>>();
+                this->resolver_ = std::make_shared<inversify::AutoResolver<T, U>>();
 
-                return shared_from_this();
+                return this->shared_from_this();
             }
     };
 
@@ -383,11 +384,11 @@ namespace mosure::inversify {
             { }
 
             T resolve(const Context& context) const {
-                if (!resolver_) {
+                if (!this->resolver_) {
                     throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding: " + symbol_);
                 }
 
-                return resolver_->resolve(context);
+                return this->resolver_->resolve(context);
             }
 
         private:

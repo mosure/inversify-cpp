@@ -21,7 +21,7 @@ namespace mosure::inversify {
     struct Inject : InjectBase {
         Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
 
-        using value = typename Interface;
+        using value = Interface;
     };
 
     template <typename ...Types>
@@ -80,7 +80,8 @@ namespace mosure::inversify {
             inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
                 auto symbol = static_cast<InjectBase>(dep).symbol;
 
-                return context.container.get<typename Dependency::value>(symbol);
+                using Interface = Dependency::value;
+                return context.container.get<Interface>(symbol);
             }
     };
 

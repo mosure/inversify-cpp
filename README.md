@@ -86,7 +86,7 @@ struct Fizz : IFizz {
     int counter_ { 0 };
 };
 
-inline static auto fizz = inversify::Injectable<Fizz>::inject(
+inline static auto injectFizz = inversify::Injectable<Fizz>::inject(
     inversify::Inject<int>(types::foo),
     inversify::Inject<double>(types::bar)
 );
