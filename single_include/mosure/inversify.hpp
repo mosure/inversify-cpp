@@ -44,15 +44,78 @@ SOFTWARE.
 #include <functional>
 #include <memory>
 
+// #include <mosure/context.hpp>
+
+
+// #include <mosure/interfaces/icontainer.hpp>
+
+
+#include <memory>
+
+// #include <mosure/symbol.hpp>
+
+
+#include <string>
+
+
+namespace mosure::inversify {
+
+    using Symbol = std::string;
+
+}
+
+
+
+namespace mosure::inversify {
+
+    template <typename T>
+    class BindingTo;
+
+    template <typename T>
+    using BindingToPtr = std::shared_ptr<BindingTo<T>>;
+
+    template <typename Implementation>
+    class IContainer {
+        public:
+            template <typename T>
+            inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
+                auto crtpImplementation = static_cast<Implementation const *>(this);
+
+                return crtpImplementation->bind<T>(type);
+            }
+
+            template <typename T>
+            T get(const inversify::Symbol& type) const {
+                auto crtpImplementation = static_cast<Implementation const *>(this);
+
+                return crtpImplementation->get<T>(type);
+            }
+    };
+
+}
+
+
+
+namespace mosure::inversify {
+
+    class Container;
+
+    struct Context {
+        const inversify::IContainer<Container>& container;
+    };
+
+}
+
 // #include <mosure/factory.hpp>
 
 
 #include <functional>
 
+// #include <mosure/context.hpp>
+
+
 
 namespace mosure::inversify {
-
-    struct Context;
 
     template <typename T>
     using Factory = std::function<T(const inversify::Context&)>;
@@ -66,18 +129,6 @@ namespace mosure::inversify {
 #include <type_traits>
 
 // #include <mosure/context.hpp>
-
-
-
-namespace mosure::inversify {
-
-    class Container;
-
-    struct Context {
-        const inversify::Container& container;
-    };
-
-}
 
 // #include <mosure/factory.hpp>
 
@@ -109,16 +160,6 @@ namespace mosure::inversify {
 }
 
 // #include <mosure/symbol.hpp>
-
-
-#include <string>
-
-
-namespace mosure::inversify {
-
-    using Symbol = std::string;
-
-}
 
 
 
@@ -410,6 +451,8 @@ namespace mosure::inversify {
 
 // #include <mosure/binding.hpp>
 
+// #include <mosure/context.hpp>
+
 // #include <mosure/symbol.hpp>
 
 // #include <mosure/exceptions/symbol.hpp>
@@ -429,13 +472,13 @@ namespace mosure::inversify::exceptions {
 
 }
 
+// #include <mosure/interfaces/icontainer.hpp>
+
 
 
 namespace mosure::inversify {
 
-    struct Context;
-
-    class Container {
+    class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
             inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
@@ -468,7 +511,7 @@ namespace mosure::inversify {
 
         private:
             std::unordered_map<inversify::Symbol, std::any> bindings_ { };
-            Context context_ { *this };
+            inversify::Context context_ { *this };
     };
 
 }

@@ -5,15 +5,15 @@
 #include <utility>
 
 #include <mosure/binding.hpp>
+#include <mosure/context.hpp>
 #include <mosure/symbol.hpp>
 #include <mosure/exceptions/symbol.hpp>
+#include <mosure/interfaces/icontainer.hpp>
 
 
 namespace mosure::inversify {
 
-    struct Context;
-
-    class Container {
+    class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
             inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
@@ -46,7 +46,7 @@ namespace mosure::inversify {
 
         private:
             std::unordered_map<inversify::Symbol, std::any> bindings_ { };
-            Context context_ { *this };
+            inversify::Context context_ { *this };
     };
 
 }

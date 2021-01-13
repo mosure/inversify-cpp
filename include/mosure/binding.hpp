@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 
+#include <mosure/context.hpp>
 #include <mosure/factory.hpp>
 #include <mosure/resolver.hpp>
 #include <mosure/symbol.hpp>
