@@ -410,8 +410,6 @@ namespace mosure::inversify {
 
 // #include <mosure/binding.hpp>
 
-// #include <mosure/context.hpp>
-
 // #include <mosure/symbol.hpp>
 
 // #include <mosure/exceptions/symbol.hpp>
@@ -434,6 +432,8 @@ namespace mosure::inversify::exceptions {
 
 
 namespace mosure::inversify {
+
+    struct Context;
 
     class Container {
         public:
