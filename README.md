@@ -1,17 +1,21 @@
 # InversifyCpp
 
-[![main test](https://github.com/mosure/inversifycpp/workflows/Test/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3ATest)
+[![main Ubuntu](https://github.com/mosure/inversifycpp/workflows/ubuntu/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3Aubuntu)
+[![main Ubuntu](https://github.com/mosure/inversifycpp/workflows/macos/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3Amacos)
+[![main Ubuntu](https://github.com/mosure/inversifycpp/workflows/windows/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3Awindows)
 [![GitHub License](https://img.shields.io/github/license/mosure/inversifycpp)](https://raw.githubusercontent.com/mosure/inversifycpp/main/LICENSE)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/mosure/inversifycpp)](https://github.com/mosure/inversifycpp)
 [![GitHub Releases](https://img.shields.io/github/v/release/mosure/inversifycpp?include_prereleases&sort=semver)](https://github.com/mosure/inversifycpp/releases)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed98bee84ee14c8eb6ad6a0f85b94ca1)](https://www.codacy.com/gh/Mosure/InversifyCpp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mosure/InversifyCpp&amp;utm_campaign=Badge_Grade)
 [![GitHub Downloads](https://img.shields.io/github/downloads/mosure/inversifycpp/total)](https://github.com/mosure/inversifycpp/releases)
 [![GitHub Issues](https://img.shields.io/github/issues/mosure/inversifycpp)](https://github.com/mosure/inversifycpp/issues)
+[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/mosure/inversify.svg)](https://isitmaintained.com/project/mosure/inversifycpp "Average time to resolve an issue")
 
 C++17 inversion of control and dependency injection container library.
 
 ## Features
-  - Constant, dynamic, and factory resolvers
-  - Singleton and per-resolution scopes
+-  Constant, dynamic, and factory resolvers
+-  Singleton and per-resolution scopes
 
 ## Integration
 
@@ -197,8 +201,8 @@ Use the following to run tests:
 `bazel run test --enable_platform_specific_config`
 
 ## TODOS
-  - More compile-time checks
-  - Thread safety
+-  More compile-time checks
+-  Thread safety
 
 ## Generating `single_include` Variant
 

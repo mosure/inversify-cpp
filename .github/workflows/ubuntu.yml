@@ -1,0 +1,23 @@
+on: [push, pull_request]
+name: Test
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.15.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup bazelisk
+      run: go get github.com/bazelbuild/bazelisk
+    - name: Add to path
+      run: echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+    - name: Test
+      run: bazel run test --enable_platform_specific_config

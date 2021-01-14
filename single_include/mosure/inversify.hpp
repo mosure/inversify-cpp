@@ -166,14 +166,14 @@ namespace mosure::inversify {
 namespace mosure::inversify {
 
     struct InjectBase {
-        InjectBase(inversify::Symbol symbol) : symbol(symbol) {  }
+        explicit InjectBase(const inversify::Symbol& symbol) : symbol(symbol) {  }
 
         inversify::Symbol symbol;
     };
 
     template <typename Interface>
     struct Inject : InjectBase {
-        Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
+        explicit Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
 
         using value = Interface;
     };
@@ -251,7 +251,7 @@ namespace mosure::inversify {
 namespace mosure::inversify::exceptions {
 
     struct ResolutionException : public std::runtime_error {
-        ResolutionException(std::string msg) : std::runtime_error(msg) { }
+        explicit ResolutionException(const std::string& msg) : std::runtime_error(msg) { }
     };
 
 }
@@ -272,7 +272,7 @@ namespace mosure::inversify {
     template <typename T>
     class ConstantResolver : public Resolver<T> {
         public:
-            ConstantResolver(T value) : value_(value) { }
+            explicit ConstantResolver(T value) : value_(value) { }
 
             T resolve(const inversify::Context&) override {
                 return value_;
@@ -285,7 +285,7 @@ namespace mosure::inversify {
     template <typename T>
     class DynamicResolver : public Resolver<T> {
         public:
-            DynamicResolver(inversify::Factory<T> factory) : factory_(factory) { }
+            explicit DynamicResolver(inversify::Factory<T> factory) : factory_(factory) { }
 
             T resolve(const inversify::Context& context) override {
                 return factory_(context);
@@ -347,7 +347,7 @@ namespace mosure::inversify {
         static_assert(std::is_copy_constructible_v<T>, "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?");
 
         public:
-            CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
+            explicit CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
 
             T resolve(const inversify::Context& context) override {
                 // TODO: add lock for multi-thread support
@@ -414,7 +414,7 @@ namespace mosure::inversify {
     template <typename T>
     class Binding : public BindingTo<T> {
         public:
-            Binding(const inversify::Symbol& symbol)
+            explicit Binding(const inversify::Symbol& symbol)
                 :
                 symbol_(symbol)
             { }
@@ -461,7 +461,7 @@ namespace mosure::inversify {
 namespace mosure::inversify::exceptions {
 
     struct SymbolException : public std::runtime_error {
-        SymbolException(const inversify::Symbol& symbol) : std::runtime_error("inversify::Symbol not found: " + symbol) { }
+        explicit SymbolException(const inversify::Symbol& symbol) : std::runtime_error("inversify::Symbol not found: " + symbol) { }
     };
 
 }
