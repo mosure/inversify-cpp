@@ -13,14 +13,14 @@
 namespace mosure::inversify {
 
     struct InjectBase {
-        InjectBase(inversify::Symbol symbol) : symbol(symbol) {  }
+        explicit InjectBase(const inversify::Symbol& symbol) : symbol(symbol) {  }
 
         inversify::Symbol symbol;
     };
 
     template <typename Interface>
     struct Inject : InjectBase {
-        Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
+        explicit Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
 
         using value = Interface;
     };

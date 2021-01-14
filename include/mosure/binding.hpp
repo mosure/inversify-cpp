@@ -52,7 +52,7 @@ namespace mosure::inversify {
     template <typename T>
     class Binding : public BindingTo<T> {
         public:
-            Binding(const inversify::Symbol& symbol)
+            explicit Binding(const inversify::Symbol& symbol)
                 :
                 symbol_(symbol)
             { }

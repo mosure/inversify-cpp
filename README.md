@@ -7,14 +7,11 @@
 [![GitHub Downloads](https://img.shields.io/github/downloads/mosure/inversifycpp/total)](https://github.com/mosure/inversifycpp/releases)
 [![GitHub Issues](https://img.shields.io/github/issues/mosure/inversifycpp)](https://github.com/mosure/inversifycpp/issues)
 
-
 C++17 inversion of control and dependency injection container library.
 
-
 ## Features
-- Constant, dynamic, and factory resolvers
-- Singleton and per-resolution scopes
-
+  - Constant, dynamic, and factory resolvers
+  - Singleton and per-resolution scopes
 
 ## Integration
 
@@ -26,7 +23,6 @@ C++17 inversion of control and dependency injection container library.
 namespace inversify = mosure::inversify;
 
 ```
-
 
 ### Examples
 
@@ -61,7 +57,6 @@ namespace types {
 
 ```
 
-
 #### Declare Classes and Dependencies
 
 ```cpp
@@ -92,7 +87,6 @@ inline static auto injectFizz = inversify::Injectable<Fizz>::inject(
 );
 
 ```
-
 
 #### Configure Bindings
 
@@ -171,7 +165,6 @@ container.bind<IFizzSharedPtr>(types::autoFizzShared)->to<Fizz>()->inSingletonSc
 
 ```
 
-
 #### Resolving Dependencies
 
 ```cpp
@@ -197,17 +190,15 @@ autoFizzShared->buzz();
 
 ```
 
-
 ### Running Tests
 
 Use the following to run tests:
 
 `bazel run test --enable_platform_specific_config`
 
-
 ## TODOS
-- More compile-time checks
-- Thread safety
+  - More compile-time checks
+  - Thread safety
 
 ## Generating `single_include` Variant
 
