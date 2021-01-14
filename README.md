@@ -14,8 +14,8 @@
 C++17 inversion of control and dependency injection container library.
 
 ## Features
--  Constant, dynamic, and factory resolvers
--  Singleton and per-resolution scopes
+*   Constant, dynamic, and factory resolvers
+*   Singleton and per-resolution scopes
 
 ## Integration
 
@@ -201,8 +201,8 @@ Use the following to run tests:
 `bazel run test --enable_platform_specific_config`
 
 ## TODOS
--  More compile-time checks
--  Thread safety
+*   More compile-time checks
+*   Thread safety
 
 ## Generating `single_include` Variant
 
