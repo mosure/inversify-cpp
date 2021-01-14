@@ -1,5 +1,6 @@
 # InversifyCpp
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c5648122741c42f4813877402e7fe954)](https://app.codacy.com/gh/Mosure/InversifyCpp?utm_source=github.com&utm_medium=referral&utm_content=Mosure/InversifyCpp&utm_campaign=Badge_Grade_Settings)
 [![main test](https://github.com/mosure/inversifycpp/workflows/Test/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3ATest)
 [![GitHub License](https://img.shields.io/github/license/mosure/inversifycpp)](https://raw.githubusercontent.com/mosure/inversifycpp/main/LICENSE)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/mosure/inversifycpp)](https://github.com/mosure/inversifycpp)
