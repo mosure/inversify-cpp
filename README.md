@@ -14,8 +14,19 @@
 C++17 inversion of control and dependency injection container library.
 
 ## Features
-*   Constant, dynamic, and factory resolvers
-*   Singleton and per-resolution scopes
+*   Constant, dynamic, and automatic resolvers
+*   Singleton, resolution (TODO), and unique scopes
+
+## Documentation
+
+### Scope
+Scope manages the uniqueness of a dependency.
+
+Singleton scopes are cached after the first resolution and will be returned on subsequent `container.get...` calls.
+
+Resolution scopes are cached throughout the duration of a single `container.get...` call. A dependency tree with duplicate dependencies will resolve each to the same cached value.
+
+By default, the unique scope is used (except for constant values). The unique scope will resolve a unique dependency for each `container.get...` call.
 
 ## Integration
 
@@ -106,8 +117,8 @@ Constant bindings are always singletons.
 
 ```cpp
 
-container.bind<int>(types::foo)->toConstantValue(10);
-container.bind<double>(types::bar)->toConstantValue(1.618);
+container.bind<int>(types::foo).toConstantValue(10);
+container.bind<double>(types::bar).toConstantValue(1.618);
 
 ```
 
@@ -121,7 +132,7 @@ Singleton scope dynamic bindings cache the first resolution of the binding.
 
 ```cpp
 
-container.bind<IFizzPtr>(types::fizz)->toDynamicValue(
+container.bind<IFizzPtr>(types::fizz).toDynamicValue(
     [](const inversify::Context& ctx) {
         auto foo = ctx.container.get<int>(types::foo);
         auto bar = ctx.container.get<double>(types::bar);
@@ -130,7 +141,7 @@ container.bind<IFizzPtr>(types::fizz)->toDynamicValue(
 
         return fizz;
     }
-)->inSingletonScope();
+).inSingletonScope();
 
 ```
 
@@ -140,7 +151,7 @@ Dynamic bindings can be used to resolve factory functions.
 
 ```cpp
 
-container.bind<std::function<IFizzPtr()>>(types::fizzFactory)->toDynamicValue(
+container.bind<std::function<IFizzPtr()>>(types::fizzFactory).toDynamicValue(
     [](const inversify::Context& ctx) {
         return [&]() {
             auto foo = ctx.container.get<int>(types::foo);
@@ -163,9 +174,9 @@ Automatic bindings can generate instances, unique_ptr's, and shared_ptr's of a c
 
 ```cpp
 
-container.bind<Fizz>(types::autoFizz)->to<Fizz>();
-container.bind<IFizzUniquePtr>(types::autoFizzUnique)->to<Fizz>();
-container.bind<IFizzSharedPtr>(types::autoFizzShared)->to<Fizz>()->inSingletonScope();
+container.bind<Fizz>(types::autoFizz).to<Fizz>();
+container.bind<IFizzUniquePtr>(types::autoFizzUnique).to<Fizz>();
+container.bind<IFizzSharedPtr>(types::autoFizzShared).to<Fizz>().inSingletonScope();
 
 ```
 
@@ -200,9 +211,12 @@ Use the following to run tests:
 
 `bazel run test --enable_platform_specific_config`
 
+> Note: run the example app in a similar way: `bazel run example --enable_platform_specific_config`
+
 ## TODOS
 *   More compile-time checks
 *   Thread safety
+*   Resolution scope
 
 ## Generating `single_include` Variant
 

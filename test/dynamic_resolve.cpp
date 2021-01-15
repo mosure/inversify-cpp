@@ -17,8 +17,8 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     GIVEN("A container with dynamic binding") {
         inversify::Container container {};
 
-        container.bind<double>(types::foo)->toConstantValue(3.1415);
-        container.bind<int>(types::bar)->toDynamicValue([](const inversify::Context& ctx) {
+        container.bind<double>(types::foo).toConstantValue(3.1415);
+        container.bind<int>(types::bar).toDynamicValue([](const inversify::Context& ctx) {
             auto foo = ctx.container.get<double>(types::foo);
 
             return (int)foo;
@@ -33,7 +33,7 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         }
 
         WHEN("the binding is redefined") {
-            container.bind<int>(types::bar)->toDynamicValue([](const inversify::Context& ctx) {
+            container.bind<int>(types::bar).toDynamicValue([](const inversify::Context& ctx) {
                 auto foo = ctx.container.get<double>(types::foo);
 
                 return (int)foo * 2;
@@ -52,10 +52,10 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     GIVEN("A container with factory binding") {
         inversify::Container container {};
 
-        container.bind<int>(types::foo)->toConstantValue(10);
-        container.bind<double>(types::bar)->toConstantValue(1.618);
+        container.bind<int>(types::foo).toConstantValue(10);
+        container.bind<double>(types::bar).toConstantValue(1.618);
 
-        container.bind<std::function<IFizzUniquePtr()>>(types::fizzFactory)->toDynamicValue(
+        container.bind<std::function<IFizzUniquePtr()>>(types::fizzFactory).toDynamicValue(
             [](const inversify::Context& ctx) {
                 return [&]() {
                     auto foo = ctx.container.get<int>(types::foo);
@@ -87,10 +87,10 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     GIVEN("A container with singleton dynamic binding") {
         inversify::Container container {};
 
-        container.bind<int>(types::foo)->toConstantValue(10);
-        container.bind<double>(types::bar)->toConstantValue(1.618);
+        container.bind<int>(types::foo).toConstantValue(10);
+        container.bind<double>(types::bar).toConstantValue(1.618);
 
-        container.bind<IFizzSharedPtr>(types::fizz)->toDynamicValue(
+        container.bind<IFizzSharedPtr>(types::fizz).toDynamicValue(
             [](const inversify::Context& ctx) {
                 auto foo = ctx.container.get<int>(types::foo);
                 auto bar = ctx.container.get<double>(types::bar);
@@ -99,7 +99,7 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
 
                 return fizz;
             }
-        )->inSingletonScope();
+        ).inSingletonScope();
 
         WHEN("multiple dependencies are resolved") {
             auto fizz1 = container.get<IFizzSharedPtr>(types::fizz);
@@ -114,10 +114,10 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     GIVEN("A container with resolution dynamic binding") {
         inversify::Container container {};
 
-        container.bind<int>(types::foo)->toConstantValue(10);
-        container.bind<double>(types::bar)->toConstantValue(1.618);
+        container.bind<int>(types::foo).toConstantValue(10);
+        container.bind<double>(types::bar).toConstantValue(1.618);
 
-        container.bind<IFizzUniquePtr>(types::fizz)->toDynamicValue(
+        container.bind<IFizzUniquePtr>(types::fizz).toDynamicValue(
             [](const inversify::Context& ctx) {
                 auto foo = ctx.container.get<int>(types::foo);
                 auto bar = ctx.container.get<double>(types::bar);

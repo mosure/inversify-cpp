@@ -12,7 +12,7 @@ SCENARIO("container resolves constant values", "[resolve]") {
     GIVEN("A container with constant binding") {
         inversify::Container container {};
 
-        container.bind<int>(types::foo)->toConstantValue(10);
+        container.bind<int>(types::foo).toConstantValue(10);
 
         WHEN("the dependency is resolved") {
             auto result = container.get<int>(types::foo);
@@ -23,7 +23,7 @@ SCENARIO("container resolves constant values", "[resolve]") {
         }
 
         WHEN("the binding is redefined") {
-            container.bind<int>(types::foo)->toConstantValue(20);
+            container.bind<int>(types::foo).toConstantValue(20);
 
             WHEN("the dependency is resolved") {
                 auto result = container.get<int>(types::foo);

@@ -16,10 +16,10 @@ namespace mosure::inversify {
     class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
-            inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
+            inversify::BindingTo<T>& bind(const inversify::Symbol& type) {
                 static_assert(!std::is_abstract<T>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
 
-                auto binding = std::make_shared<inversify::Binding<T>>(type);
+                auto binding = inversify::Binding<T>(type);
 
                 auto lookup = bindings_.find(type);
                 if (lookup != bindings_.end()) {
@@ -29,7 +29,7 @@ namespace mosure::inversify {
                 auto pair = std::make_pair(type, std::any(binding));
                 bindings_.insert(pair);
 
-                return binding;
+                return std::any_cast<inversify::Binding<T>&>(bindings_.at(type));
             }
 
             template <typename T>
@@ -39,9 +39,9 @@ namespace mosure::inversify {
                     throw inversify::exceptions::SymbolException(type);
                 }
 
-                auto binding = std::any_cast<BindingPtr<T>>(symbolBinding->second);
+                auto binding = std::any_cast<Binding<T>>(symbolBinding->second);
 
-                return binding->resolve(context_);
+                return binding.resolve(context_);
             }
 
         private:

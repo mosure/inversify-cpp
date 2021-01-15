@@ -30,7 +30,7 @@ SOFTWARE.
 
 #include <any>              // any, any_cast
 #include <functional>       // function
-#include <memory>           // enable_shared_from_this, make_shared, make_unique, shared_ptr, unique_ptr
+#include <memory>           // make_shared, make_unique, shared_ptr, unique_ptr
 #include <stdexcept>        // runtime_error
 #include <string>           // string
 #include <unordered_map>    // unordered_map

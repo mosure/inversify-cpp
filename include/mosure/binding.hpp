@@ -12,7 +12,7 @@
 namespace mosure::inversify {
 
     template <typename T>
-    class BindingScope : public std::enable_shared_from_this<BindingScope<T>> {
+    class BindingScope {
         public:
             void inSingletonScope() {
                 resolver_ = std::make_shared<inversify::CachedResolver<T>>(resolver_);
@@ -23,31 +23,25 @@ namespace mosure::inversify {
     };
 
     template <typename T>
-    using BindingScopePtr = std::shared_ptr<BindingScope<T>>;
-
-    template <typename T>
     class BindingTo : public BindingScope<T> {
         public:
             void toConstantValue(T&& value) {
                 this->resolver_ = std::make_shared<inversify::ConstantResolver<T>>(value);
             }
 
-            BindingScopePtr<T> toDynamicValue(inversify::Factory<T> factory) {
+            BindingScope<T>& toDynamicValue(inversify::Factory<T> factory) {
                 this->resolver_ = std::make_shared<inversify::DynamicResolver<T>>(factory);
 
-                return this->shared_from_this();
+                return *this;
             }
 
             template <typename U>
-            BindingScopePtr<T> to() {
+            BindingScope<T>& to() {
                 this->resolver_ = std::make_shared<inversify::AutoResolver<T, U>>();
 
-                return this->shared_from_this();
+                return *this;
             }
     };
-
-    template <typename T>
-    using BindingToPtr = std::shared_ptr<BindingTo<T>>;
 
     template <typename T>
     class Binding : public BindingTo<T> {
@@ -68,8 +62,5 @@ namespace mosure::inversify {
         private:
             const inversify::Symbol& symbol_;
     };
-
-    template <typename T>
-    using BindingPtr = std::shared_ptr<Binding<T>>;
 
 }

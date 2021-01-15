@@ -30,7 +30,7 @@ SOFTWARE.
 
 #include <any>              // any, any_cast
 #include <functional>       // function
-#include <memory>           // enable_shared_from_this, make_shared, make_unique, shared_ptr, unique_ptr
+#include <memory>           // make_shared, make_unique, shared_ptr, unique_ptr
 #include <stdexcept>        // runtime_error
 #include <string>           // string
 #include <unordered_map>    // unordered_map
@@ -71,14 +71,11 @@ namespace mosure::inversify {
     template <typename T>
     class BindingTo;
 
-    template <typename T>
-    using BindingToPtr = std::shared_ptr<BindingTo<T>>;
-
     template <typename Implementation>
     class IContainer {
         public:
             template <typename T>
-            inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
+            inversify::BindingTo<T>& bind(const inversify::Symbol& type) {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
                 return crtpImplementation->template bind<T>(type);
@@ -374,7 +371,7 @@ namespace mosure::inversify {
 namespace mosure::inversify {
 
     template <typename T>
-    class BindingScope : public std::enable_shared_from_this<BindingScope<T>> {
+    class BindingScope {
         public:
             void inSingletonScope() {
                 resolver_ = std::make_shared<inversify::CachedResolver<T>>(resolver_);
@@ -385,31 +382,25 @@ namespace mosure::inversify {
     };
 
     template <typename T>
-    using BindingScopePtr = std::shared_ptr<BindingScope<T>>;
-
-    template <typename T>
     class BindingTo : public BindingScope<T> {
         public:
             void toConstantValue(T&& value) {
                 this->resolver_ = std::make_shared<inversify::ConstantResolver<T>>(value);
             }
 
-            BindingScopePtr<T> toDynamicValue(inversify::Factory<T> factory) {
+            BindingScope<T>& toDynamicValue(inversify::Factory<T> factory) {
                 this->resolver_ = std::make_shared<inversify::DynamicResolver<T>>(factory);
 
-                return this->shared_from_this();
+                return *this;
             }
 
             template <typename U>
-            BindingScopePtr<T> to() {
+            BindingScope<T>& to() {
                 this->resolver_ = std::make_shared<inversify::AutoResolver<T, U>>();
 
-                return this->shared_from_this();
+                return *this;
             }
     };
-
-    template <typename T>
-    using BindingToPtr = std::shared_ptr<BindingTo<T>>;
 
     template <typename T>
     class Binding : public BindingTo<T> {
@@ -430,9 +421,6 @@ namespace mosure::inversify {
         private:
             const inversify::Symbol& symbol_;
     };
-
-    template <typename T>
-    using BindingPtr = std::shared_ptr<Binding<T>>;
 
 }
 
@@ -475,10 +463,10 @@ namespace mosure::inversify {
     class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
-            inversify::BindingToPtr<T> bind(const inversify::Symbol& type) {
+            inversify::BindingTo<T>& bind(const inversify::Symbol& type) {
                 static_assert(!std::is_abstract<T>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
 
-                auto binding = std::make_shared<inversify::Binding<T>>(type);
+                auto binding = inversify::Binding<T>(type);
 
                 auto lookup = bindings_.find(type);
                 if (lookup != bindings_.end()) {
@@ -488,7 +476,7 @@ namespace mosure::inversify {
                 auto pair = std::make_pair(type, std::any(binding));
                 bindings_.insert(pair);
 
-                return binding;
+                return std::any_cast<inversify::Binding<T>&>(bindings_.at(type));
             }
 
             template <typename T>
@@ -498,9 +486,9 @@ namespace mosure::inversify {
                     throw inversify::exceptions::SymbolException(type);
                 }
 
-                auto binding = std::any_cast<BindingPtr<T>>(symbolBinding->second);
+                auto binding = std::any_cast<Binding<T>>(symbolBinding->second);
 
-                return binding->resolve(context_);
+                return binding.resolve(context_);
             }
 
         private:
