@@ -221,3 +221,7 @@ Use the following to run tests:
 ## Generating `single_include` Variant
 
 Run `python ./third_party/amalgamate/amalgamate.py -c ./third_party/amalgamate/config.json -s ./` from the root of the repository.
+
+## Thanks
+
+*   [InversifyJS](https://inversify.io/) - API design and inspiration for the project.
