@@ -3,7 +3,7 @@
 #include <mosure/inversify.hpp>
 
 #include "mock/ifizz.hpp"
-#include "mock/types.hpp"
+#include "mock/symbols.hpp"
 
 
 namespace inversify = mosure::inversify;
@@ -26,6 +26,6 @@ struct Fizz : IFizz {
 };
 
 inline static auto _ = inversify::Injectable<Fizz>::inject(
-    inversify::Inject<int>(types::foo),
-    inversify::Inject<double>(types::bar)
+    inversify::Inject<int>(symbols::foo),
+    inversify::Inject<double>(symbols::bar)
 );

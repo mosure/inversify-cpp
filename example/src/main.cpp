@@ -1,6 +1,6 @@
 #include <mosure/inversify.hpp>
 
-#include <api/types.hpp>
+#include <api/symbols.hpp>
 
 #include <src/logger.hpp>
 #include <src/mock_logger.hpp>
@@ -13,13 +13,13 @@ namespace inversify = mosure::inversify;
 int main() {
     inversify::Container container {};
 
-    container.bind<ILoggerPtr>(types::logger).to<Logger>().inSingletonScope();
-    container.bind<IServicePtr>(types::service).to<Service>();
-    container.bind<ISettings>(types::settings).to<Settings>().inSingletonScope();
+    container.bind<ILoggerPtr>(symbols::logger).to<Logger>().inSingletonScope();
+    container.bind<IServicePtr>(symbols::service).to<Service>();
+    container.bind<ISettings>(symbols::settings).to<Settings>().inSingletonScope();
 
-    //container.bind<ILoggerPtr>(types::logger).to<MockLogger>().inSingletonScope();
+    //container.bind<ILoggerPtr>(symbols::logger).to<MockLogger>().inSingletonScope();
 
-    container.get<IServicePtr>(types::service)->run();
+    container.get<IServicePtr>(symbols::service)->run();
 
     return 0;
 }

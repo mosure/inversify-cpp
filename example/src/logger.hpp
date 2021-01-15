@@ -6,7 +6,7 @@
 
 #include <api/logger.hpp>
 #include <api/settings.hpp>
-#include <api/types.hpp>
+#include <api/symbols.hpp>
 
 
 class Logger : public ILogger {
@@ -55,5 +55,5 @@ class Logger : public ILogger {
 
 namespace inversify = mosure::inversify;
 inline static auto injectLogger = inversify::Injectable<Logger>::inject(
-    inversify::Inject<ISettings>(types::settings)
+    inversify::Inject<ISettings>(symbols::settings)
 );

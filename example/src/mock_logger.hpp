@@ -3,16 +3,15 @@
 #include <mosure/inversify.hpp>
 
 #include <api/logger.hpp>
-#include <api/settings.hpp>
-#include <api/types.hpp>
+#include <api/symbols.hpp>
 
 
 class MockLogger : public ILogger {
     public:
-        void info(std::string message) const override { };
-        void warn(std::string message) const override { };
-        void error(std::string message) const override { };
-        void log(LogLevel level, std::string message) const override { };
+        void info(std::string) const override { };
+        void warn(std::string) const override { };
+        void error(std::string) const override { };
+        void log(LogLevel, std::string) const override { };
 };
 
 namespace inversify = mosure::inversify;

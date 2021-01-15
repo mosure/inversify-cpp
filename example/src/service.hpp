@@ -4,7 +4,7 @@
 
 #include <api/logger.hpp>
 #include <api/service.hpp>
-#include <api/types.hpp>
+#include <api/symbols.hpp>
 
 
 class Service : public IService {
@@ -26,5 +26,5 @@ class Service : public IService {
 
 namespace inversify = mosure::inversify;
 inline static auto injectService = inversify::Injectable<Service>::inject(
-    inversify::Inject<ILoggerPtr>(types::logger)
+    inversify::Inject<ILoggerPtr>(symbols::logger)
 );

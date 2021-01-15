@@ -5,7 +5,7 @@
 
 namespace inversify = mosure::inversify;
 
-namespace types {
+namespace symbols {
     inline const inversify::Symbol foo { "Foo" };
     inline const inversify::Symbol bar { "Bar" };
     inline const inversify::Symbol fizz { "Fizz" };
