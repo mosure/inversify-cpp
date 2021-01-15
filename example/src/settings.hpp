@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdlib>
-#include <iostream>
 
 #include <mosure/inversify.hpp>
 
