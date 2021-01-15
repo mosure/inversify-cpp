@@ -25,6 +25,6 @@ class Service : public IService {
 };
 
 namespace inversify = mosure::inversify;
-inline auto injectService = inversify::Injectable<Service>::inject(
+inline static auto injectService = inversify::Injectable<Service>::inject(
     inversify::Inject<ILoggerPtr>(symbols::logger)
 );
