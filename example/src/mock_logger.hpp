@@ -15,4 +15,4 @@ class MockLogger : public ILogger {
 };
 
 namespace inversify = mosure::inversify;
-inline static auto injectMockLogger = inversify::Injectable<MockLogger>::inject();
+inline auto injectMockLogger = inversify::Injectable<MockLogger>::inject();

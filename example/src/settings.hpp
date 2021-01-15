@@ -24,4 +24,4 @@ struct Settings : ISettings {
 };
 
 namespace inversify = mosure::inversify;
-inline static auto injectSettings = inversify::Injectable<Settings>::inject();
+inline auto injectSettings = inversify::Injectable<Settings>::inject();
