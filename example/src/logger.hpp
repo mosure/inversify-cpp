@@ -16,19 +16,19 @@ class Logger : public ILogger {
             settings_(settings)
         { }
 
-        void info(std::string message) const override {
+        void info(const std::string& message) const override {
             log(LogLevel::INFO, message);
         };
 
-        void warn(std::string message) const override {
+        void warn(const std::string& message) const override {
             log(LogLevel::WARN, message);
         };
 
-        void error(std::string message) const override {
+        void error(const std::string& message) const override {
             log(LogLevel::ERROR, message);
         };
 
-        void log(LogLevel level, std::string message) const override {
+        void log(LogLevel level, const std::string& message) const override {
             if (settings_.logLevel > level) {
                 return;
             }

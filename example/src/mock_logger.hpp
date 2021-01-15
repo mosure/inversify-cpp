@@ -8,10 +8,10 @@
 
 class MockLogger : public ILogger {
     public:
-        void info(std::string) const override { };
-        void warn(std::string) const override { };
-        void error(std::string) const override { };
-        void log(LogLevel, std::string) const override { };
+        void info(const std::string&) const override { };
+        void warn(const std::string&) const override { };
+        void error(const std::string&) const override { };
+        void log(LogLevel, const std::string&) const override { };
 };
 
 namespace inversify = mosure::inversify;
