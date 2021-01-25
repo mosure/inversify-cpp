@@ -1,17 +1,20 @@
 #pragma once
 
+#include <functional>
+
 #include <mosure/inversify.hpp>
+
+#include "mock/ifizz.hpp"
 
 
 namespace inversify = mosure::inversify;
 
 namespace symbols {
-    inline const inversify::Symbol foo { "Foo" };
-    inline const inversify::Symbol bar { "Bar" };
-    inline const inversify::Symbol fizz { "Fizz" };
-    inline const inversify::Symbol fizzFactory { "FizzFactory" };
+    inline extern inversify::Symbol<int> foo {};
+    inline extern inversify::Symbol<double> bar {};
+    inline extern inversify::Symbol<IFizzSharedPtr> fizz {};
+    inline extern inversify::Symbol<std::function<IFizzUniquePtr()>> fizzFactory {};
 
-    inline const inversify::Symbol autoFizz { "AutoFizz" };
-    inline const inversify::Symbol autoFizzUnique { "AutoFizzUnique" };
-    inline const inversify::Symbol autoFizzShared { "AutoFizzShared" };
+    inline extern inversify::Symbol<IFizzUniquePtr> autoFizzUnique {};
+    inline extern inversify::Symbol<IFizzSharedPtr> autoFizzShared {};
 }

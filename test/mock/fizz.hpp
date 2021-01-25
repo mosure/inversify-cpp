@@ -26,6 +26,6 @@ struct Fizz : IFizz {
 };
 
 inline static auto _ = inversify::Injectable<Fizz>::inject(
-    inversify::Inject<int>(symbols::foo),
-    inversify::Inject<double>(symbols::bar)
+    symbols::foo,
+    symbols::bar
 );

@@ -60,14 +60,13 @@ using IFizzPtr = std::unique_ptr<IFizz>;
 ```cpp
 
 namespace symbols {
-    inline const inversify::Symbol foo { "Foo" };
-    inline const inversify::Symbol bar { "Bar" };
-    inline const inversify::Symbol fizz { "Fizz" };
-    inline const inversify::Symbol fizzFactory { "FizzFactory" };
+    inline extern inversify::Symbol<int> foo {};
+    inline extern inversify::Symbol<double> bar {};
+    inline extern inversify::Symbol<IFizzPtr> fizz {};
+    inline extern inversify::Symbol<std::function<IFizzPtr()>> fizzFactory {};
 
-    inline const inversify::Symbol autoFizz { "AutoFizz" };
-    inline const inversify::Symbol autoFizzUnique { "AutoFizzUnique" };
-    inline const inversify::Symbol autoFizzShared { "AutoFizzShared" };
+    inline extern inversify::Symbol<IFizzUniquePtr> autoFizzUnique {};
+    inline extern inversify::Symbol<IFizzSharedPtr> autoFizzShared {};
 }
 
 ```
@@ -97,8 +96,8 @@ struct Fizz : IFizz {
 };
 
 inline static auto injectFizz = inversify::Injectable<Fizz>::inject(
-    inversify::Inject<int>(symbols::foo),
-    inversify::Inject<double>(symbols::bar)
+    symbols::foo,
+    symbols::bar
 );
 
 ```
@@ -107,7 +106,7 @@ inline static auto injectFizz = inversify::Injectable<Fizz>::inject(
 
 ```cpp
 
-inversify::Container container {};
+inversify::Container container;
 
 ```
 
@@ -117,8 +116,8 @@ Constant bindings are always singletons.
 
 ```cpp
 
-container.bind<int>(symbols::foo).toConstantValue(10);
-container.bind<double>(symbols::bar).toConstantValue(1.618);
+container.bind(symbols::foo).toConstantValue(10);
+container.bind(symbols::bar).toConstantValue(1.618);
 
 ```
 
@@ -132,10 +131,10 @@ Singleton scope dynamic bindings cache the first resolution of the binding.
 
 ```cpp
 
-container.bind<IFizzPtr>(symbols::fizz).toDynamicValue(
+container.bind(symbols::fizz).toDynamicValue(
     [](const inversify::Context& ctx) {
-        auto foo = ctx.container.get<int>(symbols::foo);
-        auto bar = ctx.container.get<double>(symbols::bar);
+        auto foo = ctx.container.get(symbols::foo);
+        auto bar = ctx.container.get(symbols::bar);
 
         auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -151,11 +150,11 @@ Dynamic bindings can be used to resolve factory functions.
 
 ```cpp
 
-container.bind<std::function<IFizzPtr()>>(symbols::fizzFactory).toDynamicValue(
+container.bind(symbols::fizzFactory).toDynamicValue(
     [](const inversify::Context& ctx) {
         return [&]() {
-            auto foo = ctx.container.get<int>(symbols::foo);
-            auto bar = ctx.container.get<double>(symbols::bar);
+            auto foo = ctx.container.get(symbols::foo);
+            auto bar = ctx.container.get(symbols::bar);
 
             auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -174,9 +173,8 @@ Automatic bindings can generate instances, unique_ptr's, and shared_ptr's of a c
 
 ```cpp
 
-container.bind<Fizz>(symbols::autoFizz).to<Fizz>();
-container.bind<IFizzUniquePtr>(symbols::autoFizzUnique).to<Fizz>();
-container.bind<IFizzSharedPtr>(symbols::autoFizzShared).to<Fizz>().inSingletonScope();
+container.bind(symbols::autoFizzUnique).to<Fizz>();
+container.bind(symbols::autoFizzShared).to<Fizz>().inSingletonScope();
 
 ```
 
@@ -184,23 +182,20 @@ container.bind<IFizzSharedPtr>(symbols::autoFizzShared).to<Fizz>().inSingletonSc
 
 ```cpp
 
-auto bar = container.get<double>(symbols::bar);
+auto bar = container.get(symbols::bar);
 
-auto fizz = container.get<IFizzPtr>(symbols::fizz);
+auto fizz = container.get(symbols::fizz);
 fizz->buzz();
 
-auto fizzFactory = container.get<std::function<IFizzPtr()>>(symbols::fizzFactory);
+auto fizzFactory = container.get(symbols::fizzFactory);
 auto anotherFizz = fizzFactory();
 anotherFizz->buzz();
 
 
-auto autoFizz = container.get<Fizz>(symbols::autoFizz);
-autoFizz.buzz();
-
-auto autoFizzUnique = container.get<IFizzUniquePtr>(symbols::autoFizzUnique);
+auto autoFizzUnique = container.get(symbols::autoFizzUnique);
 autoFizzUnique->buzz();
 
-auto autoFizzShared = container.get<IFizzSharedPtr>(symbols::autoFizzShared);
+auto autoFizzShared = container.get(symbols::autoFizzShared);
 autoFizzShared->buzz();
 
 ```

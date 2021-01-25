@@ -55,12 +55,22 @@ SOFTWARE.
 // #include <mosure/symbol.hpp>
 
 
-#include <string>
+#include <iostream>
 
 
 namespace mosure::inversify {
 
-    using Symbol = std::string;
+    namespace {
+        inline static int counter = 0;
+    }
+
+    template <typename Interface>
+    struct Symbol {
+        Symbol() : id(counter++) { }
+
+        const int id;
+        using value = Interface;
+    };
 
 }
 
@@ -75,17 +85,17 @@ namespace mosure::inversify {
     class IContainer {
         public:
             template <typename T>
-            inversify::BindingTo<T>& bind(const inversify::Symbol& type) {
+            inversify::BindingTo<T>& bind(const inversify::Symbol<T>& type) {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->template bind<T>(type);
+                return crtpImplementation->bind(type);
             }
 
             template <typename T>
-            T get(const inversify::Symbol& type) const {
+            T get(const inversify::Symbol<T>& type) const {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->template get<T>(type);
+                return crtpImplementation->get(type);
             }
     };
 
@@ -122,6 +132,7 @@ namespace mosure::inversify {
 // #include <mosure/resolver.hpp>
 
 
+#include <atomic>
 #include <memory>
 #include <type_traits>
 
@@ -144,9 +155,10 @@ namespace mosure::inversify {
 
 
 #include <type_traits>
+#include <utility>
 
 
-namespace mosure::inversify {
+namespace mosure::inversify::meta {
 
     template <class T, template <class...> class Template>
     struct is_specialization : std::false_type { };
@@ -162,22 +174,9 @@ namespace mosure::inversify {
 
 namespace mosure::inversify {
 
-    struct InjectBase {
-        explicit InjectBase(const inversify::Symbol& symbol) : symbol(symbol) {  }
-
-        inversify::Symbol symbol;
-    };
-
-    template <typename Interface>
-    struct Inject : InjectBase {
-        explicit Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
-
-        using value = Interface;
-    };
-
     template <typename ...Types>
     inline constexpr bool valid_inject_types_v = std::conjunction_v<
-        is_specialization<Types, Inject>...
+        meta::is_specialization<Types, Symbol>...
     >;
 
     template <typename Implementation>
@@ -189,7 +188,7 @@ namespace mosure::inversify {
 
             template <typename... Dependencies>
             inline static Injectable inject(Dependencies... dependencies) {
-                static_assert(valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Inject");
+                static_assert(valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Symbol");
 
                 factory = [
                     deps = std::make_tuple(dependencies...)
@@ -229,10 +228,10 @@ namespace mosure::inversify {
         private:
             template <typename Dependency>
             inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
-                auto symbol = static_cast<InjectBase>(dep).symbol;
-
                 using Interface = typename Dependency::value;
-                return context.container.template get<Interface>(symbol);
+                auto symbol = static_cast<Symbol<Interface>>(dep);
+
+                return context.container.get(symbol);
             }
     };
 
@@ -347,7 +346,6 @@ namespace mosure::inversify {
             explicit CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
 
             T resolve(const inversify::Context& context) override {
-                // TODO: add lock for multi-thread support
                 if (!hasCached_) {
                     hasCached_ = true;
                     cached_ = parent_->resolve(context);
@@ -358,7 +356,7 @@ namespace mosure::inversify {
 
         private:
             T cached_;
-            bool hasCached_ { false };
+            std::atomic<bool> hasCached_ { false };
             ResolverPtr<T> parent_;
     };
 
@@ -405,21 +403,21 @@ namespace mosure::inversify {
     template <typename T>
     class Binding : public BindingTo<T> {
         public:
-            explicit Binding(const inversify::Symbol& symbol)
+            explicit Binding(const inversify::Symbol<T>& symbol)
                 :
                 symbol_(symbol)
             { }
 
             T resolve(const Context& context) const {
                 if (!this->resolver_) {
-                    throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding: " + symbol_);
+                    throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
                 }
 
                 return this->resolver_->resolve(context);
             }
 
         private:
-            const inversify::Symbol& symbol_;
+            const inversify::Symbol<T>& symbol_;
     };
 
 }
@@ -442,14 +440,11 @@ namespace mosure::inversify {
 
 #include <stdexcept>
 
-// #include <mosure/symbol.hpp>
-
-
 
 namespace mosure::inversify::exceptions {
 
     struct SymbolException : public std::runtime_error {
-        explicit SymbolException(const inversify::Symbol& symbol) : std::runtime_error("inversify::Symbol not found: " + symbol) { }
+        explicit SymbolException() : std::runtime_error("inversify::Symbol not found.") { }
     };
 
 }
@@ -463,36 +458,36 @@ namespace mosure::inversify {
     class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
-            inversify::BindingTo<T>& bind(const inversify::Symbol& type) {
+            inversify::BindingTo<T>& bind(const inversify::Symbol<T>& type) {
                 static_assert(!std::is_abstract<T>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
 
-                auto binding = inversify::Binding<T>(type);
+                auto binding = inversify::Binding(type);
 
-                auto lookup = bindings_.find(type);
+                auto lookup = bindings_.find(type.id);
                 if (lookup != bindings_.end()) {
-                    bindings_.erase(type);
+                    bindings_.erase(type.id);
                 }
 
-                auto pair = std::make_pair(type, std::any(binding));
+                auto pair = std::make_pair(type.id, std::any(binding));
                 bindings_.insert(pair);
 
-                return std::any_cast<inversify::Binding<T>&>(bindings_.at(type));
+                return std::any_cast<inversify::Binding<T>&>(bindings_.at(type.id));
             }
 
             template <typename T>
-            T get(const inversify::Symbol& type) const {
-                auto symbolBinding = bindings_.find(type);
+            T get(const inversify::Symbol<T>& type) const {
+                auto symbolBinding = bindings_.find(type.id);
                 if (symbolBinding == bindings_.end()) {
-                    throw inversify::exceptions::SymbolException(type);
+                    throw inversify::exceptions::SymbolException();
                 }
 
-                auto binding = std::any_cast<Binding<T>>(symbolBinding->second);
+                auto binding = std::any_cast<inversify::Binding<T>>(symbolBinding->second);
 
                 return binding.resolve(context_);
             }
 
         private:
-            std::unordered_map<inversify::Symbol, std::any> bindings_ { };
+            std::unordered_map<int, std::any> bindings_ { };
             inversify::Context context_ { *this };
     };
 

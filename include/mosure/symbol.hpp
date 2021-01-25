@@ -1,10 +1,20 @@
 #pragma once
 
-#include <string>
+#include <iostream>
 
 
 namespace mosure::inversify {
 
-    using Symbol = std::string;
+    namespace {
+        inline static int counter = 0;
+    }
+
+    template <typename Interface>
+    struct Symbol {
+        Symbol() : id(counter++) { }
+
+        const int id;
+        using value = Interface;
+    };
 
 }

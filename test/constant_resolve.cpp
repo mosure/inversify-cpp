@@ -10,12 +10,12 @@ namespace inversify = mosure::inversify;
 SCENARIO("container resolves constant values", "[resolve]") {
 
     GIVEN("A container with constant binding") {
-        inversify::Container container {};
+        inversify::Container container;
 
-        container.bind<int>(symbols::foo).toConstantValue(10);
+        container.bind(symbols::foo).toConstantValue(10);
 
         WHEN("the dependency is resolved") {
-            auto result = container.get<int>(symbols::foo);
+            auto result = container.get(symbols::foo);
 
             THEN("the correct value is returned") {
                 REQUIRE(result == 10);
@@ -23,10 +23,10 @@ SCENARIO("container resolves constant values", "[resolve]") {
         }
 
         WHEN("the binding is redefined") {
-            container.bind<int>(symbols::foo).toConstantValue(20);
+            container.bind(symbols::foo).toConstantValue(20);
 
             WHEN("the dependency is resolved") {
-                auto result = container.get<int>(symbols::foo);
+                auto result = container.get(symbols::foo);
 
                 THEN("the updated value is returned") {
                     REQUIRE(result == 20);
