@@ -12,22 +12,9 @@
 
 namespace mosure::inversify {
 
-    struct InjectBase {
-        explicit InjectBase(const inversify::Symbol& symbol) : symbol(symbol) {  }
-
-        inversify::Symbol symbol;
-    };
-
-    template <typename Interface>
-    struct Inject : InjectBase {
-        explicit Inject(inversify::Symbol symbol) : InjectBase(symbol) {  }
-
-        using value = Interface;
-    };
-
     template <typename ...Types>
     inline constexpr bool valid_inject_types_v = std::conjunction_v<
-        is_specialization<Types, Inject>...
+        meta::is_specialization<Types, Symbol>...
     >;
 
     template <typename Implementation>
@@ -39,7 +26,7 @@ namespace mosure::inversify {
 
             template <typename... Dependencies>
             inline static Injectable inject(Dependencies... dependencies) {
-                static_assert(valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Inject");
+                static_assert(valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Symbol");
 
                 factory = [
                     deps = std::make_tuple(dependencies...)
@@ -79,10 +66,10 @@ namespace mosure::inversify {
         private:
             template <typename Dependency>
             inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
-                auto symbol = static_cast<InjectBase>(dep).symbol;
-
                 using Interface = typename Dependency::value;
-                return context.container.template get<Interface>(symbol);
+                auto symbol = static_cast<Symbol<Interface>>(dep);
+
+                return context.container.get(symbol);
             }
     };
 

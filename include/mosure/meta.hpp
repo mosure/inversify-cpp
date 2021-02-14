@@ -1,9 +1,10 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 
 
-namespace mosure::inversify {
+namespace mosure::inversify::meta {
 
     template <class T, template <class...> class Template>
     struct is_specialization : std::false_type { };

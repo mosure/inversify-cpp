@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <memory>
 #include <type_traits>
 
@@ -101,7 +102,6 @@ namespace mosure::inversify {
             explicit CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
 
             T resolve(const inversify::Context& context) override {
-                // TODO: add lock for multi-thread support
                 if (!hasCached_) {
                     hasCached_ = true;
                     cached_ = parent_->resolve(context);
@@ -112,7 +112,7 @@ namespace mosure::inversify {
 
         private:
             T cached_;
-            bool hasCached_ { false };
+            std::atomic<bool> hasCached_ { false };
             ResolverPtr<T> parent_;
     };
 

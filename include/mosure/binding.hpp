@@ -46,21 +46,21 @@ namespace mosure::inversify {
     template <typename T>
     class Binding : public BindingTo<T> {
         public:
-            explicit Binding(const inversify::Symbol& symbol)
+            explicit Binding(const inversify::Symbol<T>& symbol)
                 :
                 symbol_(symbol)
             { }
 
             T resolve(const Context& context) const {
                 if (!this->resolver_) {
-                    throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding: " + symbol_);
+                    throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
                 }
 
                 return this->resolver_->resolve(context);
             }
 
         private:
-            const inversify::Symbol& symbol_;
+            const inversify::Symbol<T>& symbol_;
     };
 
 }

@@ -15,51 +15,51 @@ namespace inversify = mosure::inversify;
 SCENARIO("container resolves dynamic values", "[resolve]") {
 
     GIVEN("A container with dynamic binding") {
-        inversify::Container container {};
+        inversify::Container container;
 
-        container.bind<double>(symbols::foo).toConstantValue(3.1415);
-        container.bind<int>(symbols::bar).toDynamicValue([](const inversify::Context& ctx) {
-            auto foo = ctx.container.get<double>(symbols::foo);
+        container.bind(symbols::foo).toConstantValue(3);
+        container.bind(symbols::bar).toDynamicValue([](const inversify::Context& ctx) {
+            auto foo = ctx.container.get(symbols::foo);
 
-            return (int)foo;
+            return foo * 1.5;
         });
 
         WHEN("the dependency is resolved") {
-            auto result = container.get<int>(symbols::bar);
+            auto result = container.get(symbols::bar);
 
             THEN("the correct value is returned") {
-                REQUIRE(result == 3);
+                REQUIRE(result == 4.5);
             }
         }
 
         WHEN("the binding is redefined") {
-            container.bind<int>(symbols::bar).toDynamicValue([](const inversify::Context& ctx) {
-                auto foo = ctx.container.get<double>(symbols::foo);
+            container.bind(symbols::bar).toDynamicValue([](const inversify::Context& ctx) {
+                auto foo = ctx.container.get(symbols::foo);
 
-                return (int)foo * 2;
+                return foo * 2.5;
             });
 
             WHEN("the dependency is resolved") {
-                auto result = container.get<int>(symbols::bar);
+                auto result = container.get(symbols::bar);
 
                 THEN("the updated value is returned") {
-                    REQUIRE(result == 6);
+                    REQUIRE(result == 7.5);
                 }
             }
         }
     }
 
     GIVEN("A container with factory binding") {
-        inversify::Container container {};
+        inversify::Container container;
 
-        container.bind<int>(symbols::foo).toConstantValue(10);
-        container.bind<double>(symbols::bar).toConstantValue(1.618);
+        container.bind(symbols::foo).toConstantValue(10);
+        container.bind(symbols::bar).toConstantValue(1.618);
 
-        container.bind<std::function<IFizzUniquePtr()>>(symbols::fizzFactory).toDynamicValue(
+        container.bind(symbols::fizzFactory).toDynamicValue(
             [](const inversify::Context& ctx) {
                 return [&]() {
-                    auto foo = ctx.container.get<int>(symbols::foo);
-                    auto bar = ctx.container.get<double>(symbols::bar);
+                    auto foo = ctx.container.get(symbols::foo);
+                    auto bar = ctx.container.get(symbols::bar);
 
                     auto fizz = std::make_unique<Fizz>(foo, bar);
 
@@ -69,7 +69,7 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         );
 
         WHEN("the dependency is resolved") {
-            auto factory = container.get<std::function<IFizzUniquePtr()>>(symbols::fizzFactory);
+            auto factory = container.get(symbols::fizzFactory);
 
             WHEN("the factory is called") {
                 auto result = factory();
@@ -85,15 +85,15 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     }
 
     GIVEN("A container with singleton dynamic binding") {
-        inversify::Container container {};
+        inversify::Container container;
 
-        container.bind<int>(symbols::foo).toConstantValue(10);
-        container.bind<double>(symbols::bar).toConstantValue(1.618);
+        container.bind(symbols::foo).toConstantValue(10);
+        container.bind(symbols::bar).toConstantValue(1.618);
 
-        container.bind<IFizzSharedPtr>(symbols::fizz).toDynamicValue(
+        container.bind(symbols::fizz).toDynamicValue(
             [](const inversify::Context& ctx) {
-                auto foo = ctx.container.get<int>(symbols::foo);
-                auto bar = ctx.container.get<double>(symbols::bar);
+                auto foo = ctx.container.get(symbols::foo);
+                auto bar = ctx.container.get(symbols::bar);
 
                 auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -102,8 +102,8 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         ).inSingletonScope();
 
         WHEN("multiple dependencies are resolved") {
-            auto fizz1 = container.get<IFizzSharedPtr>(symbols::fizz);
-            auto fizz2 = container.get<IFizzSharedPtr>(symbols::fizz);
+            auto fizz1 = container.get(symbols::fizz);
+            auto fizz2 = container.get(symbols::fizz);
 
             THEN("both dependency pointers are equal") {
                 REQUIRE(fizz1 == fizz2);
@@ -112,15 +112,15 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     }
 
     GIVEN("A container with resolution dynamic binding") {
-        inversify::Container container {};
+        inversify::Container container;
 
-        container.bind<int>(symbols::foo).toConstantValue(10);
-        container.bind<double>(symbols::bar).toConstantValue(1.618);
+        container.bind(symbols::foo).toConstantValue(10);
+        container.bind(symbols::bar).toConstantValue(1.618);
 
-        container.bind<IFizzUniquePtr>(symbols::fizz).toDynamicValue(
+        container.bind(symbols::fizz).toDynamicValue(
             [](const inversify::Context& ctx) {
-                auto foo = ctx.container.get<int>(symbols::foo);
-                auto bar = ctx.container.get<double>(symbols::bar);
+                auto foo = ctx.container.get(symbols::foo);
+                auto bar = ctx.container.get(symbols::bar);
 
                 auto fizz = std::make_unique<Fizz>(foo, bar);
 
@@ -129,8 +129,8 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         );
 
         WHEN("multiple dependencies are resolved") {
-            auto fizz1 = container.get<IFizzUniquePtr>(symbols::fizz);
-            auto fizz2 = container.get<IFizzUniquePtr>(symbols::fizz);
+            auto fizz1 = container.get(symbols::fizz);
+            auto fizz2 = container.get(symbols::fizz);
 
             THEN("dependencies are unique") {
                 REQUIRE(fizz1 != fizz2);
