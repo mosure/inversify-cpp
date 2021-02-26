@@ -1,19 +1,14 @@
 #pragma once
 
-#include <iostream>
+#include <type_traits>
 
 
 namespace mosure::inversify {
 
-    namespace {
-        inline static int counter = 0;
-    }
-
     template <typename Interface>
     struct Symbol {
-        Symbol() : id(counter++) { }
+        static_assert(!std::is_abstract<Interface>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
 
-        const int id;
         using value = Interface;
     };
 

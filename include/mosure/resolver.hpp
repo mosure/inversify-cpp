@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <memory>
+#include <tuple>
 #include <type_traits>
 
 #include <mosure/context.hpp>
@@ -54,11 +55,7 @@ namespace mosure::inversify {
     class AutoResolver<T, U> : public Resolver<T> {
         public:
             T resolve(const inversify::Context& context) override {
-                if (!inversify::Injectable<U>::factory_unique) {
-                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find factory. Is the binding correct?");
-                }
-
-                return inversify::Injectable<U>::factory(context);
+                return std::make_from_tuple<U>(inversify::Injectable<U>::Inject::resolve(context));
             }
     };
 
@@ -70,11 +67,11 @@ namespace mosure::inversify {
     class AutoResolver<std::unique_ptr<T>, U> : public Resolver<std::unique_ptr<T>> {
         public:
             std::unique_ptr<T> resolve(const inversify::Context& context) override {
-                if (!inversify::Injectable<U>::factory_unique) {
-                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find unique_ptr factory. Is the binding correct?");
-                }
+                auto expansion = [&context](auto&& ... deps){
+                    return std::make_unique<U>(deps...);
+                };
 
-                return inversify::Injectable<U>::factory_unique(context);
+                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
             }
     };
 
@@ -86,11 +83,11 @@ namespace mosure::inversify {
     class AutoResolver<std::shared_ptr<T>, U> : public Resolver<std::shared_ptr<T>> {
         public:
             std::shared_ptr<T> resolve(const inversify::Context& context) override {
-                if (!inversify::Injectable<U>::factory_shared) {
-                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find shared_ptr factory. Is the binding correct?");
-                }
+                auto expansion = [&context](auto&& ... deps){
+                    return std::make_shared<U>(deps...);
+                };
 
-                return inversify::Injectable<U>::factory_shared(context);
+                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
             }
     };
 

@@ -35,6 +35,7 @@ SOFTWARE.
 #include <string>           // string
 #include <unordered_map>    // unordered_map
 #include <tuple>            // make_from_tuple, tuple
+#include <typeinfo>         // typeid
 #include <type_traits>      // apply, conjunction_v, false_type, true_type
 #include <utility>          // make_pair
 
@@ -55,20 +56,15 @@ SOFTWARE.
 // #include <mosure/symbol.hpp>
 
 
-#include <iostream>
+#include <type_traits>
 
 
 namespace mosure::inversify {
 
-    namespace {
-        inline static int counter = 0;
-    }
-
     template <typename Interface>
     struct Symbol {
-        Symbol() : id(counter++) { }
+        static_assert(!std::is_abstract<Interface>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
 
-        const int id;
         using value = Interface;
     };
 
@@ -85,17 +81,17 @@ namespace mosure::inversify {
     class IContainer {
         public:
             template <typename T>
-            inversify::BindingTo<T>& bind(const inversify::Symbol<T>& type) {
+            inversify::BindingTo<typename T::value>& bind() {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->bind(type);
+                return crtpImplementation->template bind<T>();
             }
 
             template <typename T>
-            T get(const inversify::Symbol<T>& type) const {
+            typename T::value get() const {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->get(type);
+                return crtpImplementation->template get<T>();
             }
     };
 
@@ -134,6 +130,7 @@ namespace mosure::inversify {
 
 #include <atomic>
 #include <memory>
+#include <tuple>
 #include <type_traits>
 
 // #include <mosure/context.hpp>
@@ -143,13 +140,10 @@ namespace mosure::inversify {
 // #include <mosure/injectable.hpp>
 
 
-#include <memory>
 #include <tuple>
 #include <type_traits>
 
 // #include <mosure/context.hpp>
-
-// #include <mosure/factory.hpp>
 
 // #include <mosure/meta.hpp>
 
@@ -166,6 +160,14 @@ namespace mosure::inversify::meta {
     template <template <class...> class Template, class... Args>
     struct is_specialization<Template<Args...>, Template> : std::true_type { };
 
+    template <typename ...Types>
+    inline constexpr bool valid_inject_types_v = std::conjunction_v<
+        meta::is_specialization<Types, Symbol>...
+    >;
+
+    template <typename T>
+    using value_t = typename T::value;
+
 }
 
 // #include <mosure/symbol.hpp>
@@ -174,65 +176,18 @@ namespace mosure::inversify::meta {
 
 namespace mosure::inversify {
 
-    template <typename ...Types>
-    inline constexpr bool valid_inject_types_v = std::conjunction_v<
-        meta::is_specialization<Types, Symbol>...
-    >;
+    template <typename... Dependencies>
+    struct Inject {
+        static_assert(meta::valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Symbol");
+
+        inline static auto resolve(const inversify::Context& context) {
+            return std::make_tuple(context.container.get<Dependencies>()...);
+        }
+    };
 
     template <typename Implementation>
-    class Injectable {
-        public:
-            inline static inversify::Factory<Implementation> factory;
-            inline static inversify::Factory<std::unique_ptr<Implementation>> factory_unique;
-            inline static inversify::Factory<std::shared_ptr<Implementation>> factory_shared;
-
-            template <typename... Dependencies>
-            inline static Injectable inject(Dependencies... dependencies) {
-                static_assert(valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Symbol");
-
-                factory = [
-                    deps = std::make_tuple(dependencies...)
-                ](const inversify::Context& context) mutable {
-                    auto expansion = [&context](auto&& ... deps){
-                        auto args = std::make_tuple(resolve_dependency(context, deps)...);
-
-                        return std::make_from_tuple<Implementation>(args);
-                    };
-
-                    return std::apply(expansion, std::move(deps));
-                };
-
-                factory_unique = [
-                    deps = std::make_tuple(dependencies...)
-                ](const inversify::Context& context) mutable {
-                    auto expansion = [&context](auto&& ... deps){
-                        return std::make_unique<Implementation>(resolve_dependency(context, deps)...);
-                    };
-
-                    return std::apply(expansion, std::move(deps));
-                };
-
-                factory_shared = [
-                    deps = std::make_tuple(dependencies...)
-                ](const inversify::Context& context) mutable {
-                    auto expansion = [&context](auto&& ... deps){
-                        return std::make_shared<Implementation>(resolve_dependency(context, deps)...);
-                    };
-
-                    return std::apply(expansion, std::move(deps));
-                };
-
-                return Injectable {};
-            }
-
-        private:
-            template <typename Dependency>
-            inline static typename Dependency::value resolve_dependency(const inversify::Context& context, Dependency dep) {
-                using Interface = typename Dependency::value;
-                auto symbol = static_cast<Symbol<Interface>>(dep);
-
-                return context.container.get(symbol);
-            }
+    struct Injectable {
+        using Inject = inversify::Inject<>;
     };
 
 }
@@ -298,11 +253,7 @@ namespace mosure::inversify {
     class AutoResolver<T, U> : public Resolver<T> {
         public:
             T resolve(const inversify::Context& context) override {
-                if (!inversify::Injectable<U>::factory_unique) {
-                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find factory. Is the binding correct?");
-                }
-
-                return inversify::Injectable<U>::factory(context);
+                return std::make_from_tuple<U>(inversify::Injectable<U>::Inject::resolve(context));
             }
     };
 
@@ -314,11 +265,11 @@ namespace mosure::inversify {
     class AutoResolver<std::unique_ptr<T>, U> : public Resolver<std::unique_ptr<T>> {
         public:
             std::unique_ptr<T> resolve(const inversify::Context& context) override {
-                if (!inversify::Injectable<U>::factory_unique) {
-                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find unique_ptr factory. Is the binding correct?");
-                }
+                auto expansion = [&context](auto&& ... deps){
+                    return std::make_unique<U>(deps...);
+                };
 
-                return inversify::Injectable<U>::factory_unique(context);
+                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
             }
     };
 
@@ -330,11 +281,11 @@ namespace mosure::inversify {
     class AutoResolver<std::shared_ptr<T>, U> : public Resolver<std::shared_ptr<T>> {
         public:
             std::shared_ptr<T> resolve(const inversify::Context& context) override {
-                if (!inversify::Injectable<U>::factory_shared) {
-                    throw inversify::exceptions::ResolutionException("inversify::AutoResolver could not find shared_ptr factory. Is the binding correct?");
-                }
+                auto expansion = [&context](auto&& ... deps){
+                    return std::make_shared<U>(deps...);
+                };
 
-                return inversify::Injectable<U>::factory_shared(context);
+                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
             }
     };
 
@@ -403,11 +354,6 @@ namespace mosure::inversify {
     template <typename T>
     class Binding : public BindingTo<T> {
         public:
-            explicit Binding(const inversify::Symbol<T>& symbol)
-                :
-                symbol_(symbol)
-            { }
-
             T resolve(const Context& context) const {
                 if (!this->resolver_) {
                     throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
@@ -415,9 +361,6 @@ namespace mosure::inversify {
 
                 return this->resolver_->resolve(context);
             }
-
-        private:
-            const inversify::Symbol<T>& symbol_;
     };
 
 }
@@ -426,6 +369,7 @@ namespace mosure::inversify {
 
 
 #include <any>
+#include <typeinfo>
 #include <unordered_map>
 #include <utility>
 
@@ -458,36 +402,38 @@ namespace mosure::inversify {
     class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
-            inversify::BindingTo<T>& bind(const inversify::Symbol<T>& type) {
-                static_assert(!std::is_abstract<T>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
+            inversify::BindingTo<typename T::value>& bind() {
+                auto binding = inversify::Binding<typename T::value>();
 
-                auto binding = inversify::Binding(type);
+                auto key = typeid(T).hash_code();
 
-                auto lookup = bindings_.find(type.id);
+                auto lookup = bindings_.find(key);
                 if (lookup != bindings_.end()) {
-                    bindings_.erase(type.id);
+                    bindings_.erase(key);
                 }
 
-                auto pair = std::make_pair(type.id, std::any(binding));
+                auto pair = std::make_pair(key, std::any(binding));
                 bindings_.insert(pair);
 
-                return std::any_cast<inversify::Binding<T>&>(bindings_.at(type.id));
+                return std::any_cast<inversify::Binding<typename T::value>&>(bindings_.at(key));
             }
 
             template <typename T>
-            T get(const inversify::Symbol<T>& type) const {
-                auto symbolBinding = bindings_.find(type.id);
+            typename T::value get() const {
+                auto key = typeid(T).hash_code();
+
+                auto symbolBinding = bindings_.find(key);
                 if (symbolBinding == bindings_.end()) {
                     throw inversify::exceptions::SymbolException();
                 }
 
-                auto binding = std::any_cast<inversify::Binding<T>>(symbolBinding->second);
+                auto binding = std::any_cast<inversify::Binding<typename T::value>>(symbolBinding->second);
 
                 return binding.resolve(context_);
             }
 
         private:
-            std::unordered_map<int, std::any> bindings_ { };
+            std::unordered_map<std::size_t, std::any> bindings_ { };
             inversify::Context context_ { *this };
     };
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <typeinfo>
 #include <unordered_map>
 #include <utility>
 
@@ -16,36 +17,38 @@ namespace mosure::inversify {
     class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
-            inversify::BindingTo<T>& bind(const inversify::Symbol<T>& type) {
-                static_assert(!std::is_abstract<T>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
+            inversify::BindingTo<typename T::value>& bind() {
+                auto binding = inversify::Binding<typename T::value>();
 
-                auto binding = inversify::Binding(type);
+                auto key = typeid(T).hash_code();
 
-                auto lookup = bindings_.find(type.id);
+                auto lookup = bindings_.find(key);
                 if (lookup != bindings_.end()) {
-                    bindings_.erase(type.id);
+                    bindings_.erase(key);
                 }
 
-                auto pair = std::make_pair(type.id, std::any(binding));
+                auto pair = std::make_pair(key, std::any(binding));
                 bindings_.insert(pair);
 
-                return std::any_cast<inversify::Binding<T>&>(bindings_.at(type.id));
+                return std::any_cast<inversify::Binding<typename T::value>&>(bindings_.at(key));
             }
 
             template <typename T>
-            T get(const inversify::Symbol<T>& type) const {
-                auto symbolBinding = bindings_.find(type.id);
+            typename T::value get() const {
+                auto key = typeid(T).hash_code();
+
+                auto symbolBinding = bindings_.find(key);
                 if (symbolBinding == bindings_.end()) {
                     throw inversify::exceptions::SymbolException();
                 }
 
-                auto binding = std::any_cast<inversify::Binding<T>>(symbolBinding->second);
+                auto binding = std::any_cast<inversify::Binding<typename T::value>>(symbolBinding->second);
 
                 return binding.resolve(context_);
             }
 
         private:
-            std::unordered_map<int, std::any> bindings_ { };
+            std::unordered_map<std::size_t, std::any> bindings_ { };
             inversify::Context context_ { *this };
     };
 

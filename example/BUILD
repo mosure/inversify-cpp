@@ -5,6 +5,7 @@ cc_library(
     name = "example_api",
     hdrs = glob([
         "api/*.hpp",
+        "src/*.hpp",
     ]),
     includes = [
         ".",

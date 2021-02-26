@@ -13,6 +13,3 @@ class MockLogger : public ILogger {
         void error(const std::string&) const override { };
         void log(LogLevel, const std::string&) const override { };
 };
-
-namespace inversify = mosure::inversify;
-inline static auto injectMockLogger = inversify::Injectable<MockLogger>::inject();

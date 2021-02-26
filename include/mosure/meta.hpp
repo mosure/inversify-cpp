@@ -12,4 +12,12 @@ namespace mosure::inversify::meta {
     template <template <class...> class Template, class... Args>
     struct is_specialization<Template<Args...>, Template> : std::true_type { };
 
+    template <typename ...Types>
+    inline constexpr bool valid_inject_types_v = std::conjunction_v<
+        meta::is_specialization<Types, Symbol>...
+    >;
+
+    template <typename T>
+    using value_t = typename T::value;
+
 }

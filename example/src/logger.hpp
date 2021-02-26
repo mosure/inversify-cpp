@@ -54,4 +54,9 @@ class Logger : public ILogger {
 };
 
 namespace inversify = mosure::inversify;
-inline static auto injectLogger = inversify::Injectable<Logger>::inject(symbols::settings);
+template <>
+struct inversify::Injectable<Logger> {
+    using Inject = inversify::Inject<
+        symbols::settings
+    >;
+};
