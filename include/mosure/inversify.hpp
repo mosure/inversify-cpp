@@ -35,6 +35,7 @@ SOFTWARE.
 #include <string>           // string
 #include <unordered_map>    // unordered_map
 #include <tuple>            // make_from_tuple, tuple
+#include <typeinfo>         // typeid
 #include <type_traits>      // apply, conjunction_v, false_type, true_type
 #include <utility>          // make_pair
 

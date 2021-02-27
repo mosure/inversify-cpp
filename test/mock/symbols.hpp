@@ -10,11 +10,11 @@
 namespace inversify = mosure::inversify;
 
 namespace symbols {
-    inline extern inversify::Symbol<int> foo {};
-    inline extern inversify::Symbol<double> bar {};
-    inline extern inversify::Symbol<IFizzSharedPtr> fizz {};
-    inline extern inversify::Symbol<std::function<IFizzUniquePtr()>> fizzFactory {};
+    using foo = inversify::Symbol<int>;
+    using bar = inversify::Symbol<double>;
+    using fizz = inversify::Symbol<IFizzSharedPtr>;
+    using fizzFactory = inversify::Symbol<std::function<IFizzUniquePtr()>>;
 
-    inline extern inversify::Symbol<IFizzUniquePtr> autoFizzUnique {};
-    inline extern inversify::Symbol<IFizzSharedPtr> autoFizzShared {};
+    using autoFizzUnique = inversify::Symbol<IFizzUniquePtr>;
+    using autoFizzShared = inversify::Symbol<IFizzSharedPtr>;
 }

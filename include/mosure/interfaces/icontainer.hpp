@@ -14,17 +14,17 @@ namespace mosure::inversify {
     class IContainer {
         public:
             template <typename T>
-            inversify::BindingTo<T>& bind(const inversify::Symbol<T>& type) {
+            inversify::BindingTo<typename T::value>& bind() {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->bind(type);
+                return crtpImplementation->template bind<T>();
             }
 
             template <typename T>
-            T get(const inversify::Symbol<T>& type) const {
+            typename T::value get() const {
                 auto crtpImplementation = static_cast<Implementation const *>(this);
 
-                return crtpImplementation->get(type);
+                return crtpImplementation->template get<T>();
             }
     };
 

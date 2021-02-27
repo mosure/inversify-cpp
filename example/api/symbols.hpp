@@ -9,7 +9,7 @@
 
 namespace inversify = mosure::inversify;
 namespace symbols {
-    inline extern inversify::Symbol<ILoggerPtr> logger {};
-    inline extern inversify::Symbol<IServicePtr> service {};
-    inline extern inversify::Symbol<ISettings> settings {};
+    using logger = inversify::Symbol<ILoggerPtr>;
+    using service = inversify::Symbol<IServicePtr>;
+    using settings = inversify::Symbol<ISettings>;
 }
