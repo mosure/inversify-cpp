@@ -28,16 +28,12 @@ SOFTWARE.
 
 #pragma once
 
-#include <any>              // any, any_cast
 #include <functional>       // function
 #include <memory>           // make_shared, make_unique, shared_ptr, unique_ptr
 #include <stdexcept>        // runtime_error
 #include <string>           // string
-#include <unordered_map>    // unordered_map
 #include <tuple>            // make_from_tuple, tuple
-#include <typeinfo>         // typeid
 #include <type_traits>      // apply, conjunction_v, false_type, true_type
-#include <utility>          // make_pair
 
 #include <mosure/binding.hpp>
 #include <mosure/container.hpp>

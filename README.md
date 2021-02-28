@@ -213,7 +213,6 @@ Use the following to run tests:
 
 ## TODOS
 *   More compile-time checks
-*   Thread safety
 *   Resolution scope
 
 ## Generating `single_include` Variant

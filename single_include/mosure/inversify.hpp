@@ -28,16 +28,12 @@ SOFTWARE.
 
 #pragma once
 
-#include <any>              // any, any_cast
 #include <functional>       // function
 #include <memory>           // make_shared, make_unique, shared_ptr, unique_ptr
 #include <stdexcept>        // runtime_error
 #include <string>           // string
-#include <unordered_map>    // unordered_map
 #include <tuple>            // make_from_tuple, tuple
-#include <typeinfo>         // typeid
 #include <type_traits>      // apply, conjunction_v, false_type, true_type
-#include <utility>          // make_pair
 
 // #include <mosure/binding.hpp>
 
@@ -368,11 +364,6 @@ namespace mosure::inversify {
 // #include <mosure/container.hpp>
 
 
-#include <any>
-#include <typeinfo>
-#include <unordered_map>
-#include <utility>
-
 // #include <mosure/binding.hpp>
 
 // #include <mosure/context.hpp>
@@ -399,41 +390,24 @@ namespace mosure::inversify::exceptions {
 
 namespace mosure::inversify {
 
+    template <typename Symbol>
+    struct BindingLookup {
+        inline static inversify::Binding<typename Symbol::value> binding {};
+    };
+
     class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
             inversify::BindingTo<typename T::value>& bind() {
-                auto binding = inversify::Binding<typename T::value>();
-
-                auto key = typeid(T).hash_code();
-
-                auto lookup = bindings_.find(key);
-                if (lookup != bindings_.end()) {
-                    bindings_.erase(key);
-                }
-
-                auto pair = std::make_pair(key, std::any(binding));
-                bindings_.insert(pair);
-
-                return std::any_cast<inversify::Binding<typename T::value>&>(bindings_.at(key));
+                return BindingLookup<T>::binding;
             }
 
             template <typename T>
             typename T::value get() const {
-                auto key = typeid(T).hash_code();
-
-                auto symbolBinding = bindings_.find(key);
-                if (symbolBinding == bindings_.end()) {
-                    throw inversify::exceptions::SymbolException();
-                }
-
-                auto binding = std::any_cast<inversify::Binding<typename T::value>>(symbolBinding->second);
-
-                return binding.resolve(context_);
+                return BindingLookup<T>::binding.resolve(context_);
             }
 
         private:
-            std::unordered_map<std::size_t, std::any> bindings_ { };
             inversify::Context context_ { *this };
     };
 
