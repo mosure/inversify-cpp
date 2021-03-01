@@ -1,15 +1,15 @@
-# InversifyCpp
+# inversify-cpp
 
-[![Test Ubuntu](https://github.com/mosure/inversifycpp/workflows/ubuntu/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3Aubuntu)
-[![Test MacOS](https://github.com/mosure/inversifycpp/workflows/macos/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3Amacos)
-[![Test Windows](https://github.com/mosure/inversifycpp/workflows/windows/badge.svg)](https://github.com/Mosure/InversifyCpp/actions?query=workflow%3Awindows)
-[![GitHub License](https://img.shields.io/github/license/mosure/inversifycpp)](https://raw.githubusercontent.com/mosure/inversifycpp/main/LICENSE)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/mosure/inversifycpp)](https://github.com/mosure/inversifycpp)
-[![GitHub Releases](https://img.shields.io/github/v/release/mosure/inversifycpp?include_prereleases&sort=semver)](https://github.com/mosure/inversifycpp/releases)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed98bee84ee14c8eb6ad6a0f85b94ca1)](https://www.codacy.com/gh/Mosure/InversifyCpp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mosure/InversifyCpp&amp;utm_campaign=Badge_Grade)
-[![GitHub Downloads](https://img.shields.io/github/downloads/mosure/inversifycpp/total)](https://github.com/mosure/inversifycpp/releases)
-[![GitHub Issues](https://img.shields.io/github/issues/mosure/inversifycpp)](https://github.com/mosure/inversifycpp/issues)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mosure/inversifycpp.svg)](http://isitmaintained.com/project/mosure/inversifycpp "Average time to resolve an issue")
+[![Test Ubuntu](https://github.com/mosure/inversify-cpp/workflows/ubuntu/badge.svg)](https://github.com/Mosure/inversify-cpp/actions?query=workflow%3Aubuntu)
+[![Test MacOS](https://github.com/mosure/inversify-cpp/workflows/macos/badge.svg)](https://github.com/Mosure/inversify-cpp/actions?query=workflow%3Amacos)
+[![Test Windows](https://github.com/mosure/inversify-cpp/workflows/windows/badge.svg)](https://github.com/Mosure/inversify-cpp/actions?query=workflow%3Awindows)
+[![GitHub License](https://img.shields.io/github/license/mosure/inversify-cpp)](https://raw.githubusercontent.com/mosure/inversify-cpp/main/LICENSE)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/mosure/inversify-cpp)](https://github.com/mosure/inversify-cpp)
+[![GitHub Releases](https://img.shields.io/github/v/release/mosure/inversify-cpp?include_prereleases&sort=semver)](https://github.com/mosure/inversify-cpp/releases)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed98bee84ee14c8eb6ad6a0f85b94ca1)](https://www.codacy.com/gh/Mosure/inversify-cpp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mosure/inversify-cpp&amp;utm_campaign=Badge_Grade)
+[![GitHub Downloads](https://img.shields.io/github/downloads/mosure/inversify-cpp/total)](https://github.com/mosure/inversify-cpp/releases)
+[![GitHub Issues](https://img.shields.io/github/issues/mosure/inversify-cpp)](https://github.com/mosure/inversify-cpp/issues)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mosure/inversify-cpp.svg)](http://isitmaintained.com/project/mosure/inversify-cpp "Average time to resolve an issue")
 
 C++17 inversion of control and dependency injection container library.
 
