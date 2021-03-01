@@ -66,25 +66,26 @@ using ServiceCPtr = std::shared_ptr<IServiceC>;
 using symbolC = inversify::Symbol<ServiceCPtr>;
 
 template <>
-struct inversify::Injectable<ServiceA> {
-    using Inject = inversify::Inject<
+struct inversify::Injectable<ServiceA>
+    : inversify::Inject<
         symbols::foo
-    >;
-};
+    >
+{ };
 
 template <>
-struct inversify::Injectable<ServiceB> {
-    using Inject = inversify::Inject<
+struct inversify::Injectable<ServiceB>
+    : inversify::Inject<
         symbolA
-    >;
-};
+    >
+{ };
 
 template <>
-struct inversify::Injectable<ServiceC> {
-    using Inject = inversify::Inject<
+struct inversify::Injectable<ServiceC>
+    : inversify::Inject<
         symbolB
-    >;
-};
+    >
+{ };
+
 
 SCENARIO("container resolves automatic values quickly", "[performance]") {
 

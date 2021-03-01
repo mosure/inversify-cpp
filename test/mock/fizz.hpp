@@ -26,9 +26,9 @@ struct Fizz : IFizz {
 };
 
 template <>
-struct inversify::Injectable<Fizz> {
-    using Inject = inversify::Inject<
+struct inversify::Injectable<Fizz>
+    : inversify::Inject<
         symbols::foo,
         symbols::bar
-    >;
-};
+    >
+{ };

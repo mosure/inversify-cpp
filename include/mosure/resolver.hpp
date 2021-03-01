@@ -55,7 +55,7 @@ namespace mosure::inversify {
     class AutoResolver<T, U> : public Resolver<T> {
         public:
             T resolve(const inversify::Context& context) override {
-                return std::make_from_tuple<U>(inversify::Injectable<U>::Inject::resolve(context));
+                return std::make_from_tuple<U>(inversify::Injectable<U>::resolve(context));
             }
     };
 
@@ -71,7 +71,7 @@ namespace mosure::inversify {
                     return std::make_unique<U>(deps...);
                 };
 
-                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
+                return std::apply(expansion, std::move(inversify::Injectable<U>::resolve(context)));
             }
     };
 
@@ -87,13 +87,16 @@ namespace mosure::inversify {
                     return std::make_shared<U>(deps...);
                 };
 
-                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
+                return std::apply(expansion, std::move(inversify::Injectable<U>::resolve(context)));
             }
     };
 
     template <typename T>
     class CachedResolver : public Resolver<T> {
-        static_assert(std::is_copy_constructible_v<T>, "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?");
+        static_assert(
+            std::is_copy_constructible_v<T>,
+            "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?"
+        );
 
         public:
             explicit CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }

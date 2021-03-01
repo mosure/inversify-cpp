@@ -26,8 +26,8 @@ class Service : public IService {
 
 namespace inversify = mosure::inversify;
 template <>
-struct inversify::Injectable<Service> {
-    using Inject = inversify::Inject<
+struct inversify::Injectable<Service>
+    : inversify::Inject<
         symbols::logger
-    >;
-};
+    >
+{ };

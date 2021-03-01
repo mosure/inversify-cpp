@@ -55,8 +55,8 @@ class Logger : public ILogger {
 
 namespace inversify = mosure::inversify;
 template <>
-struct inversify::Injectable<Logger> {
-    using Inject = inversify::Inject<
+struct inversify::Injectable<Logger>
+    : inversify::Inject<
         symbols::settings
-    >;
-};
+    >
+{ };
