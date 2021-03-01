@@ -15,12 +15,12 @@ namespace mosure::inversify {
     class Container : public inversify::IContainer<Container> {
         public:
             template <typename T>
-            inversify::BindingTo<typename T::value>& bind() {
+            inline inversify::BindingTo<typename T::value>& bind() {
                 return BindingLookup<T>::binding;
             }
 
             template <typename T>
-            typename T::value get() const {
+            inline typename T::value get() const {
                 return BindingLookup<T>::binding.resolve(context_);
             }
 
