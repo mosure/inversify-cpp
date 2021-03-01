@@ -6,7 +6,6 @@
 #include <mosure/context.hpp>
 #include <mosure/factory.hpp>
 #include <mosure/resolver.hpp>
-#include <mosure/symbol.hpp>
 
 
 namespace mosure::inversify {

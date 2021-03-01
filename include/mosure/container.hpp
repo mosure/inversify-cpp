@@ -2,8 +2,6 @@
 
 #include <mosure/binding.hpp>
 #include <mosure/context.hpp>
-#include <mosure/symbol.hpp>
-#include <mosure/exceptions/symbol.hpp>
 #include <mosure/interfaces/icontainer.hpp>
 
 
