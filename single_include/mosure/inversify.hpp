@@ -309,8 +309,6 @@ namespace mosure::inversify {
 
 }
 
-// #include <mosure/symbol.hpp>
-
 
 
 namespace mosure::inversify {
@@ -368,22 +366,6 @@ namespace mosure::inversify {
 
 // #include <mosure/context.hpp>
 
-// #include <mosure/symbol.hpp>
-
-// #include <mosure/exceptions/symbol.hpp>
-
-
-#include <stdexcept>
-
-
-namespace mosure::inversify::exceptions {
-
-    struct SymbolException : public std::runtime_error {
-        explicit SymbolException() : std::runtime_error("inversify::Symbol not found.") { }
-    };
-
-}
-
 // #include <mosure/interfaces/icontainer.hpp>
 
 
@@ -427,8 +409,6 @@ namespace mosure::inversify {
 
 
 // #include <mosure/exceptions/resolution.hpp>
-
-// #include <mosure/exceptions/symbol.hpp>
 
 
 
