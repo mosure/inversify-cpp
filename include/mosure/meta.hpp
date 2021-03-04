@@ -3,6 +3,8 @@
 #include <type_traits>
 #include <utility>
 
+#include <mosure/symbol.hpp>
+
 
 namespace mosure::inversify::meta {
 
@@ -14,7 +16,7 @@ namespace mosure::inversify::meta {
 
     template <typename ...Types>
     inline constexpr bool valid_inject_types_v = std::conjunction_v<
-        meta::is_specialization<Types, Symbol>...
+        meta::is_specialization<Types, inversify::Symbol>...
     >;
 
     template <typename T>

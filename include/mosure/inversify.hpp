@@ -37,7 +37,6 @@ SOFTWARE.
 
 #include <mosure/binding.hpp>
 #include <mosure/container.hpp>
-#include <mosure/context.hpp>
 #include <mosure/factory.hpp>
 #include <mosure/injectable.hpp>
 #include <mosure/meta.hpp>

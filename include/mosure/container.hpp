@@ -1,8 +1,6 @@
 #pragma once
 
 #include <mosure/binding.hpp>
-#include <mosure/context.hpp>
-#include <mosure/interfaces/icontainer.hpp>
 
 
 namespace mosure::inversify {
@@ -12,20 +10,14 @@ namespace mosure::inversify {
         inline static inversify::Binding<typename Symbol::value> binding {};
     };
 
-    class Container : public inversify::IContainer<Container> {
-        public:
-            template <typename T>
-            inline inversify::BindingTo<typename T::value>& bind() {
-                return BindingLookup<T>::binding;
-            }
+    template <typename T>
+    inline static inversify::BindingTo<typename T::value>& bind() {
+        return BindingLookup<T>::binding;
+    }
 
-            template <typename T>
-            inline typename T::value get() const {
-                return BindingLookup<T>::binding.resolve(context_);
-            }
-
-        private:
-            inversify::Context context_ { *this };
-    };
+    template <typename T>
+    inline static typename T::value get() {
+        return BindingLookup<T>::binding.resolve();
+    }
 
 }

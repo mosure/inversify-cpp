@@ -90,19 +90,17 @@ struct inversify::Injectable<ServiceC>
 SCENARIO("container resolves automatic values quickly", "[performance]") {
 
     GIVEN("A container with an auto binding chain") {
-        inversify::Container container;
-
-        container.bind<symbols::foo>().toConstantValue(10);
-        container.bind<symbolA>().to<ServiceA>();
-        container.bind<symbolB>().to<ServiceB>();
-        container.bind<symbolC>().to<ServiceC>();
+        inversify::bind<symbols::foo>().toConstantValue(10);
+        inversify::bind<symbolA>().to<ServiceA>();
+        inversify::bind<symbolB>().to<ServiceB>();
+        inversify::bind<symbolC>().to<ServiceC>();
 
         WHEN("the dependency is resolved") {
             const int iterations = 1000000;
 
             auto inversify_start = std::chrono::high_resolution_clock::now();
             for (int i = 0; i < iterations; ++i) {
-                container.get<symbolC>();
+                inversify::get<symbolC>();
             }
             auto inversify_finish = std::chrono::high_resolution_clock::now();
             auto inversify_us = std::chrono::duration_cast<std::chrono::microseconds>(inversify_finish - inversify_start);

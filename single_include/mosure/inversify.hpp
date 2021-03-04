@@ -41,13 +41,40 @@ SOFTWARE.
 #include <functional>
 #include <memory>
 
-// #include <mosure/context.hpp>
+// #include <mosure/factory.hpp>
 
 
-// #include <mosure/interfaces/icontainer.hpp>
+#include <functional>
 
 
+namespace mosure::inversify {
+
+    template <typename T>
+    using Factory = std::function<T()>;
+
+}
+
+// #include <mosure/resolver.hpp>
+
+
+#include <atomic>
 #include <memory>
+#include <tuple>
+#include <type_traits>
+
+// #include <mosure/factory.hpp>
+
+// #include <mosure/injectable.hpp>
+
+
+#include <tuple>
+#include <type_traits>
+
+// #include <mosure/meta.hpp>
+
+
+#include <type_traits>
+#include <utility>
 
 // #include <mosure/symbol.hpp>
 
@@ -68,86 +95,6 @@ namespace mosure::inversify {
 
 
 
-namespace mosure::inversify {
-
-    template <typename T>
-    class BindingTo;
-
-    template <typename Implementation>
-    class IContainer {
-        public:
-            template <typename T>
-            inversify::BindingTo<typename T::value>& bind() {
-                auto crtpImplementation = static_cast<Implementation const *>(this);
-
-                return crtpImplementation->template bind<T>();
-            }
-
-            template <typename T>
-            typename T::value get() const {
-                auto crtpImplementation = static_cast<Implementation const *>(this);
-
-                return crtpImplementation->template get<T>();
-            }
-    };
-
-}
-
-
-
-namespace mosure::inversify {
-
-    class Container;
-
-    struct Context {
-        const inversify::IContainer<Container>& container;
-    };
-
-}
-
-// #include <mosure/factory.hpp>
-
-
-#include <functional>
-
-// #include <mosure/context.hpp>
-
-
-
-namespace mosure::inversify {
-
-    template <typename T>
-    using Factory = std::function<T(const inversify::Context&)>;
-
-}
-
-// #include <mosure/resolver.hpp>
-
-
-#include <atomic>
-#include <memory>
-#include <tuple>
-#include <type_traits>
-
-// #include <mosure/context.hpp>
-
-// #include <mosure/factory.hpp>
-
-// #include <mosure/injectable.hpp>
-
-
-#include <tuple>
-#include <type_traits>
-
-// #include <mosure/context.hpp>
-
-// #include <mosure/meta.hpp>
-
-
-#include <type_traits>
-#include <utility>
-
-
 namespace mosure::inversify::meta {
 
     template <class T, template <class...> class Template>
@@ -158,7 +105,7 @@ namespace mosure::inversify::meta {
 
     template <typename ...Types>
     inline constexpr bool valid_inject_types_v = std::conjunction_v<
-        meta::is_specialization<Types, Symbol>...
+        meta::is_specialization<Types, inversify::Symbol>...
     >;
 
     template <typename T>
@@ -172,19 +119,20 @@ namespace mosure::inversify::meta {
 
 namespace mosure::inversify {
 
+    template <typename T>
+    static typename T::value get();
+
     template <typename... Dependencies>
     struct Inject {
         static_assert(meta::valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Symbol");
 
-        inline static auto resolve(const inversify::Context& context) {
-            return std::make_tuple(context.container.get<Dependencies>()...);
+        inline static auto resolve() {
+            return std::make_tuple(inversify::get<Dependencies>()...);
         }
     };
 
-    template <typename Implementation>
-    struct Injectable {
-        using Inject = inversify::Inject<>;
-    };
+    template <typename Implementation, typename Inject = inversify::Inject<>>
+    struct Injectable : Inject { };
 
 }
 
@@ -210,7 +158,7 @@ namespace mosure::inversify {
     template <typename T>
     class Resolver {
         public:
-            virtual T resolve(const inversify::Context&) = 0;
+            inline virtual T resolve() = 0;
     };
 
     template <typename T>
@@ -221,7 +169,7 @@ namespace mosure::inversify {
         public:
             explicit ConstantResolver(T value) : value_(value) { }
 
-            T resolve(const inversify::Context&) override {
+            inline T resolve() override {
                 return value_;
             }
 
@@ -234,8 +182,8 @@ namespace mosure::inversify {
         public:
             explicit DynamicResolver(inversify::Factory<T> factory) : factory_(factory) { }
 
-            T resolve(const inversify::Context& context) override {
-                return factory_(context);
+            inline T resolve() override {
+                return factory_();
             }
 
         private:
@@ -248,8 +196,8 @@ namespace mosure::inversify {
     template <typename T, typename U>
     class AutoResolver<T, U> : public Resolver<T> {
         public:
-            T resolve(const inversify::Context& context) override {
-                return std::make_from_tuple<U>(inversify::Injectable<U>::Inject::resolve(context));
+            inline T resolve() override {
+                return std::make_from_tuple<U>(inversify::Injectable<U>::resolve());
             }
     };
 
@@ -260,12 +208,12 @@ namespace mosure::inversify {
     >
     class AutoResolver<std::unique_ptr<T>, U> : public Resolver<std::unique_ptr<T>> {
         public:
-            std::unique_ptr<T> resolve(const inversify::Context& context) override {
-                auto expansion = [&context](auto&& ... deps){
+            inline std::unique_ptr<T> resolve() override {
+                auto expansion = [](auto&& ... deps){
                     return std::make_unique<U>(deps...);
                 };
 
-                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
+                return std::apply(expansion, std::move(inversify::Injectable<U>::resolve()));
             }
     };
 
@@ -276,26 +224,29 @@ namespace mosure::inversify {
     >
     class AutoResolver<std::shared_ptr<T>, U> : public Resolver<std::shared_ptr<T>> {
         public:
-            std::shared_ptr<T> resolve(const inversify::Context& context) override {
-                auto expansion = [&context](auto&& ... deps){
+            inline std::shared_ptr<T> resolve() override {
+                auto expansion = [](auto&& ... deps){
                     return std::make_shared<U>(deps...);
                 };
 
-                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
+                return std::apply(expansion, std::move(inversify::Injectable<U>::resolve()));
             }
     };
 
     template <typename T>
     class CachedResolver : public Resolver<T> {
-        static_assert(std::is_copy_constructible_v<T>, "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?");
+        static_assert(
+            std::is_copy_constructible_v<T>,
+            "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?"
+        );
 
         public:
             explicit CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
 
-            T resolve(const inversify::Context& context) override {
+            inline T resolve() override {
                 if (!hasCached_) {
                     hasCached_ = true;
-                    cached_ = parent_->resolve(context);
+                    cached_ = parent_->resolve();
                 }
 
                 return cached_;
@@ -348,12 +299,12 @@ namespace mosure::inversify {
     template <typename T>
     class Binding : public BindingTo<T> {
         public:
-            T resolve(const Context& context) const {
+            inline T resolve() const {
                 if (!this->resolver_) {
                     throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
                 }
 
-                return this->resolver_->resolve(context);
+                return this->resolver_->resolve();
             }
     };
 
@@ -364,10 +315,6 @@ namespace mosure::inversify {
 
 // #include <mosure/binding.hpp>
 
-// #include <mosure/context.hpp>
-
-// #include <mosure/interfaces/icontainer.hpp>
-
 
 
 namespace mosure::inversify {
@@ -377,25 +324,17 @@ namespace mosure::inversify {
         inline static inversify::Binding<typename Symbol::value> binding {};
     };
 
-    class Container : public inversify::IContainer<Container> {
-        public:
-            template <typename T>
-            inversify::BindingTo<typename T::value>& bind() {
-                return BindingLookup<T>::binding;
-            }
+    template <typename T>
+    inline static inversify::BindingTo<typename T::value>& bind() {
+        return BindingLookup<T>::binding;
+    }
 
-            template <typename T>
-            typename T::value get() const {
-                return BindingLookup<T>::binding.resolve(context_);
-            }
-
-        private:
-            inversify::Context context_ { *this };
-    };
+    template <typename T>
+    inline static typename T::value get() {
+        return BindingLookup<T>::binding.resolve();
+    }
 
 }
-
-// #include <mosure/context.hpp>
 
 // #include <mosure/factory.hpp>
 

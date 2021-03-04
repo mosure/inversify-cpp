@@ -11,7 +11,7 @@
 [![GitHub Issues](https://img.shields.io/github/issues/mosure/inversify-cpp)](https://github.com/mosure/inversify-cpp/issues)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mosure/inversify-cpp.svg)](http://isitmaintained.com/project/mosure/inversify-cpp "Average time to resolve an issue")
 
-C++17 inversion of control and dependency injection container library.
+C++17 inversion of control and static dependency injection library.
 
 ## Features
 *   Constant, dynamic, and automatic resolvers
@@ -22,11 +22,11 @@ C++17 inversion of control and dependency injection container library.
 ### Scope
 Scope manages the uniqueness of a dependency.
 
-Singleton scopes are cached after the first resolution and will be returned on subsequent `container.get...` calls.
+Singleton scopes are cached after the first resolution and will be returned on subsequent `inversify::get...` calls.
 
-Resolution scopes are cached throughout the duration of a single `container.get...` call. A dependency tree with duplicate dependencies will resolve each to the same cached value.
+Resolution scopes are cached throughout the duration of a single `inversify::get...` call. A dependency tree with duplicate dependencies will resolve each to the same cached value.
 
-By default, the unique scope is used (except for constant values). The unique scope will resolve a unique dependency for each `container.get...` call.
+By default, the unique scope is used (except for constant values). The unique scope will resolve a unique dependency for each `inversify::get...` call.
 
 ## Integration
 
@@ -107,37 +107,31 @@ struct inversify::Injectable<Fizz>
 
 #### Configure Bindings
 
-```cpp
-
-inversify::Container container;
-
-```
-
 ##### Constant Values
 
 Constant bindings are always singletons.
 
 ```cpp
 
-container.bind<symbols::foo>().toConstantValue(10);
-container.bind<symbols::bar>().toConstantValue(1.618);
+inversify::bind<symbols::foo>().toConstantValue(10);
+inversify::bind<symbols::bar>().toConstantValue(1.618);
 
 ```
 
 ##### Dynamic Bindings
 
-Dynamic bindings are resolved when calling `container.get...`.
+Dynamic bindings are resolved when calling `inversify::get...`.
 
-By default, dynamic bindings have resolution scope (e.g. each call to `container.get...` calls the factory).
+By default, dynamic bindings have resolution scope (e.g. each call to `inversify::get...` calls the factory).
 
 Singleton scope dynamic bindings cache the first resolution of the binding.
 
 ```cpp
 
-container.bind<symbols::fizz>().toDynamicValue(
+inversify::bind<symbols::fizz>().toDynamicValue(
     [](const inversify::Context& ctx) {
-        auto foo = ctx.container.get<symbols::foo>();
-        auto bar = ctx.container.get<symbols::bar>();
+        auto foo = inversify::get<symbols::foo>();
+        auto bar = inversify::get<symbols::bar>();
 
         auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -153,11 +147,11 @@ Dynamic bindings can be used to resolve factory functions.
 
 ```cpp
 
-container.bind<symbols::fizzFactory>().toDynamicValue(
-    [](const inversify::Context& ctx) {
-        return [&]() {
-            auto foo = ctx.container.get<symbols::foo>();
-            auto bar = ctx.container.get<symbols::bar>();
+inversify::bind<symbols::fizzFactory>().toDynamicValue(
+    []() {
+        return [](const inversify::Context& ctx) {
+            auto foo = inversify::get<symbols::foo>();
+            auto bar = inversify::get<symbols::bar>();
 
             auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -176,8 +170,8 @@ Automatic bindings can generate instances, unique_ptr's, and shared_ptr's of a c
 
 ```cpp
 
-container.bind<symbols::autoFizzUnique>().to<Fizz>();
-container.bind<symbols::autoFizzShared>().to<Fizz>().inSingletonScope();
+inversify::bind<symbols::autoFizzUnique>().to<Fizz>();
+inversify::bind<symbols::autoFizzShared>().to<Fizz>().inSingletonScope();
 
 ```
 
@@ -185,20 +179,20 @@ container.bind<symbols::autoFizzShared>().to<Fizz>().inSingletonScope();
 
 ```cpp
 
-auto bar = container.get<symbols::bar>();
+auto bar = inversify::get<symbols::bar>();
 
-auto fizz = container.get<symbols::fizz>();
+auto fizz = inversify::get<symbols::fizz>();
 fizz->buzz();
 
-auto fizzFactory = container.get<symbols::fizzFactory>();
+auto fizzFactory = inversify::get<symbols::fizzFactory>();
 auto anotherFizz = fizzFactory();
 anotherFizz->buzz();
 
 
-auto autoFizzUnique = container.get<symbols::autoFizzUnique>();
+auto autoFizzUnique = inversify::get<symbols::autoFizzUnique>();
 autoFizzUnique->buzz();
 
-auto autoFizzShared = container.get<symbols::autoFizzShared>();
+auto autoFizzShared = inversify::get<symbols::autoFizzShared>();
 autoFizzShared->buzz();
 
 ```
@@ -210,10 +204,6 @@ Use the following to run tests:
 `bazel run test --enable_platform_specific_config`
 
 > Note: run the example app in a similar way: `bazel run example --enable_platform_specific_config`
-
-## TODOS
-*   More compile-time checks
-*   Resolution scope
 
 ## Generating `single_include` Variant
 

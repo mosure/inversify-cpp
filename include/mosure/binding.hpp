@@ -3,7 +3,6 @@
 #include <functional>
 #include <memory>
 
-#include <mosure/context.hpp>
 #include <mosure/factory.hpp>
 #include <mosure/resolver.hpp>
 
@@ -45,12 +44,12 @@ namespace mosure::inversify {
     template <typename T>
     class Binding : public BindingTo<T> {
         public:
-            inline T resolve(const Context& context) const {
+            inline T resolve() const {
                 if (!this->resolver_) {
                     throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
                 }
 
-                return this->resolver_->resolve(context);
+                return this->resolver_->resolve();
             }
     };
 
