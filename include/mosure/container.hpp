@@ -1,7 +1,6 @@
 #pragma once
 
 #include <tuple>
-#include <typeinfo>
 
 #include <mosure/binding.hpp>
 #include <mosure/context.hpp>
