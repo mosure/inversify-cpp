@@ -29,7 +29,7 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         });
 
         WHEN("the dependency is resolved") {
-            auto result = container.template get<symbols::bar>();
+            auto result = container.get<symbols::bar>();
 
             THEN("the correct value is returned") {
                 REQUIRE(result == 4.5);
@@ -44,7 +44,7 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
             });
 
             WHEN("the dependency is resolved") {
-                auto result = container.template get<symbols::bar>();
+                auto result = container.get<symbols::bar>();
 
                 THEN("the updated value is returned") {
                     REQUIRE(result == 7.5);
@@ -78,7 +78,7 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         );
 
         WHEN("the dependency is resolved") {
-            auto factory = container.template get<symbols::fizzFactory>();
+            auto factory = container.get<symbols::fizzFactory>();
 
             WHEN("the factory is called") {
                 auto result = factory();
@@ -116,8 +116,8 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         ).inSingletonScope();
 
         WHEN("multiple dependencies are resolved") {
-            auto fizz1 = container.template get<symbols::fizz>();
-            auto fizz2 = container.template get<symbols::fizz>();
+            auto fizz1 = container.get<symbols::fizz>();
+            auto fizz2 = container.get<symbols::fizz>();
 
             THEN("both dependency pointers are equal") {
                 REQUIRE(fizz1 == fizz2);
@@ -148,8 +148,8 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         );
 
         WHEN("multiple dependencies are resolved") {
-            auto fizz1 = container.template get<symbols::fizz>();
-            auto fizz2 = container.template get<symbols::fizz>();
+            auto fizz1 = container.get<symbols::fizz>();
+            auto fizz2 = container.get<symbols::fizz>();
 
             THEN("dependencies are unique") {
                 REQUIRE(fizz1 != fizz2);

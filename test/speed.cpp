@@ -32,7 +32,7 @@ SCENARIO("container resolves automatic values quickly", "[performance]") {
 
             auto inversify_start = std::chrono::high_resolution_clock::now();
             for (int i = 0; i < iterations; ++i) {
-                container.template get<symbols::symbolC>();
+                container.get<symbols::symbolC>();
             }
             auto inversify_finish = std::chrono::high_resolution_clock::now();
             auto inversify_us = std::chrono::duration_cast<std::chrono::microseconds>(inversify_finish - inversify_start);
