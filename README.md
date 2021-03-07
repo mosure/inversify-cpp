@@ -69,17 +69,6 @@ namespace symbols {
     using autoFizzShared = inversify::Symbol<std::function<IFizzSharedPtr>>;
 }
 
-struct inversify::RegisterSymbols
-    : inversify::Symbols<
-        symbols::foo,
-        symbols::bar,
-        symbols::fizz,
-        symbols::fizzFactory,
-        symbols::autoFizzUnique,
-        symbols::autoFizzShared
-    >
-{ };
-
 ```
 
 #### Declare Classes and Dependencies
