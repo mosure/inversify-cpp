@@ -45,6 +45,7 @@ SOFTWARE.
 #include <mosure/symbol.hpp>
 
 #include <mosure/exceptions/resolution.hpp>
+#include <mosure/exceptions/symbol.hpp>
 
 
 /**

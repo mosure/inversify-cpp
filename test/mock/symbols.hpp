@@ -5,6 +5,7 @@
 #include <mosure/inversify.hpp>
 
 #include "mock/ifizz.hpp"
+#include "mock/iservices.hpp"
 
 
 namespace inversify = mosure::inversify;
@@ -17,4 +18,8 @@ namespace symbols {
 
     using autoFizzUnique = inversify::Symbol<IFizzUniquePtr>;
     using autoFizzShared = inversify::Symbol<IFizzSharedPtr>;
+
+    using symbolA = inversify::Symbol<ServiceAPtr>;
+    using symbolB = inversify::Symbol<ServiceBPtr>;
+    using symbolC = inversify::Symbol<ServiceCPtr>;
 }

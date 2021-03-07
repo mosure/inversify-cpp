@@ -22,11 +22,11 @@ C++17 inversion of control and dependency injection container library.
 ### Scope
 Scope manages the uniqueness of a dependency.
 
-Singleton scopes are cached after the first resolution and will be returned on subsequent `container.get...` calls.
+Singleton scopes are cached after the first resolution and will be returned on subsequent `container.template get...` calls.
 
-Resolution scopes are cached throughout the duration of a single `container.get...` call. A dependency tree with duplicate dependencies will resolve each to the same cached value.
+Resolution scopes are cached throughout the duration of a single `container.template get...` call. A dependency tree with duplicate dependencies will resolve each to the same cached value.
 
-By default, the unique scope is used (except for constant values). The unique scope will resolve a unique dependency for each `container.get...` call.
+By default, the unique scope is used (except for constant values). The unique scope will resolve a unique dependency for each `container.template get...` call.
 
 ## Integration
 
@@ -68,6 +68,17 @@ namespace symbols {
     using autoFizzUnique = inversify::Symbol<std::function<IFizzUniquePtr>>;
     using autoFizzShared = inversify::Symbol<std::function<IFizzSharedPtr>>;
 }
+
+struct inversify::RegisterSymbols
+    : inversify::Symbols<
+        symbols::foo,
+        symbols::bar,
+        symbols::fizz,
+        symbols::fizzFactory,
+        symbols::autoFizzUnique,
+        symbols::autoFizzShared
+    >
+{ };
 
 ```
 
@@ -126,18 +137,18 @@ container.bind<symbols::bar>().toConstantValue(1.618);
 
 ##### Dynamic Bindings
 
-Dynamic bindings are resolved when calling `container.get...`.
+Dynamic bindings are resolved when calling `container.template get...`.
 
-By default, dynamic bindings have resolution scope (e.g. each call to `container.get...` calls the factory).
+By default, dynamic bindings have resolution scope (e.g. each call to `container.template get...` calls the factory).
 
 Singleton scope dynamic bindings cache the first resolution of the binding.
 
 ```cpp
 
 container.bind<symbols::fizz>().toDynamicValue(
-    [](const inversify::Context& ctx) {
-        auto foo = ctx.container.get<symbols::foo>();
-        auto bar = ctx.container.get<symbols::bar>();
+    [](auto& ctx) {
+        auto foo = ctx.container.template get<symbols::foo>();
+        auto bar = ctx.container.template get<symbols::bar>();
 
         auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -154,10 +165,10 @@ Dynamic bindings can be used to resolve factory functions.
 ```cpp
 
 container.bind<symbols::fizzFactory>().toDynamicValue(
-    [](const inversify::Context& ctx) {
+    [](auto& ctx) {
         return [&]() {
-            auto foo = ctx.container.get<symbols::foo>();
-            auto bar = ctx.container.get<symbols::bar>();
+            auto foo = ctx.container.template get<symbols::foo>();
+            auto bar = ctx.container.template get<symbols::bar>();
 
             auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -185,20 +196,20 @@ container.bind<symbols::autoFizzShared>().to<Fizz>().inSingletonScope();
 
 ```cpp
 
-auto bar = container.get<symbols::bar>();
+auto bar = container.template get<symbols::bar>();
 
-auto fizz = container.get<symbols::fizz>();
+auto fizz = container.template get<symbols::fizz>();
 fizz->buzz();
 
-auto fizzFactory = container.get<symbols::fizzFactory>();
+auto fizzFactory = container.template get<symbols::fizzFactory>();
 auto anotherFizz = fizzFactory();
 anotherFizz->buzz();
 
 
-auto autoFizzUnique = container.get<symbols::autoFizzUnique>();
+auto autoFizzUnique = container.template get<symbols::autoFizzUnique>();
 autoFizzUnique->buzz();
 
-auto autoFizzShared = container.get<symbols::autoFizzShared>();
+auto autoFizzShared = container.template get<symbols::autoFizzShared>();
 autoFizzShared->buzz();
 
 ```
