@@ -58,7 +58,7 @@ SCENARIO("container resolves automatic values quickly", "[performance]") {
             std::cout << "ratio: " << speed_ratio << std::endl;
 
             THEN("the performance is comparable to a factory") {
-                REQUIRE(speed_ratio < 2.5);
+                REQUIRE(speed_ratio < 2.75);
             }
         }
     }
