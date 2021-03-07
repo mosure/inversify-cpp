@@ -28,7 +28,7 @@ SCENARIO("container resolves automatic values quickly", "[performance]") {
         container.bind<symbols::symbolC>().to<ServiceC>();
 
         WHEN("the dependency is resolved") {
-            const int iterations = 100000000;
+            const int iterations = 10000000;
 
             auto inversify_start = std::chrono::high_resolution_clock::now();
             for (int i = 0; i < iterations; ++i) {
@@ -58,7 +58,7 @@ SCENARIO("container resolves automatic values quickly", "[performance]") {
             std::cout << "ratio: " << speed_ratio << std::endl;
 
             THEN("the performance is comparable to a factory") {
-                REQUIRE(speed_ratio < 3.0);
+                REQUIRE(speed_ratio < 2.0);
             }
         }
     }

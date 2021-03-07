@@ -1,12 +1,10 @@
 #pragma once
 
+#include <tuple>
 #include <typeinfo>
-#include <map>
-#include <utility>
 
 #include <mosure/binding.hpp>
 #include <mosure/context.hpp>
-#include <mosure/exceptions/symbol.hpp>
 #include <mosure/interfaces/icontainer.hpp>
 #include <mosure/meta.hpp>
 
@@ -31,7 +29,7 @@ namespace mosure::inversify {
                 "inversify::Container must register at least one symbol"
             );
 
-            using BindingVariant = std::variant<
+            using BindingMap = std::tuple<
                 inversify::Binding<
                     typename SymbolTypes::value,
                     SymbolTypes...
@@ -45,20 +43,9 @@ namespace mosure::inversify {
                     "inversify::Container symbol not registered"
                 );
 
-                auto binding = inversify::Binding<typename T::value, SymbolTypes...>();
-                auto key = typeid(T).hash_code();
-
-                auto lookup = bindings_.find(key);
-                if (lookup != bindings_.end()) {
-                    bindings_.erase(key);
-                }
-
-                auto pair = std::make_pair(key, binding);
-                bindings_.insert(pair);
-
                 return std::get<
                     inversify::Binding<typename T::value, SymbolTypes...>
-                >(bindings_.at(key));
+                >(bindings_);
             }
 
             template <typename T>
@@ -68,22 +55,13 @@ namespace mosure::inversify {
                     "inversify::Container symbol not registered"
                 );
 
-                auto key = typeid(T).hash_code();
-
-                auto symbolBinding = bindings_.find(key);
-                if (symbolBinding == bindings_.end()) {
-                    throw inversify::exceptions::SymbolException();
-                }
-
-                auto binding = std::get<
+                return std::get<
                     inversify::Binding<typename T::value, SymbolTypes...>
-                >(symbolBinding->second);
-
-                return binding.resolve(context_);
+                >(bindings_).resolve(context_);
             }
 
         private:
-            std::map<std::size_t, BindingVariant> bindings_ {};
+            BindingMap bindings_ {};
             inversify::Context<SymbolTypes...> context_ { *this };
     };
 
