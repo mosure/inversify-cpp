@@ -13,6 +13,10 @@
 
 C++17 inversion of control and dependency injection container library.
 
+## Containerless Version
+
+See the [`containerless` branch](https://github.com/mosure/inversify-cpp/tree/containerless) for a static binding (containerless) version of the library.
+
 ## Features
 *   Constant, dynamic, and automatic resolvers
 *   Singleton, resolution (TODO), and unique scopes
