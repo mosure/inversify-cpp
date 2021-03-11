@@ -71,6 +71,8 @@ namespace symbols {
 
 ```
 
+> Note: symbols which hold the same interface type may do so via structs which inherit inversify::Symbol
+
 #### Declare Classes and Dependencies
 
 ```cpp

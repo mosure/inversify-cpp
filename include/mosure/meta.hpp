@@ -34,6 +34,8 @@ namespace mosure::inversify::meta {
     template <typename ...Types>
     inline constexpr bool valid_symbol_types_v = std::conjunction_v<
         meta::is_specialization<Types, inversify::Symbol>...
+    > || std::conjunction_v<
+        std::is_base_of<inversify::Symbol<typename Types::value>, Types>...
     >;
 
 }

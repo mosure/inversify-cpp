@@ -185,6 +185,8 @@ namespace mosure::inversify::meta {
     template <typename ...Types>
     inline constexpr bool valid_symbol_types_v = std::conjunction_v<
         meta::is_specialization<Types, inversify::Symbol>...
+    > || std::conjunction_v<
+        std::is_base_of<inversify::Symbol<typename Types::value>, Types>...
     >;
 
 }
@@ -386,9 +388,9 @@ namespace mosure::inversify {
     };
 
     template <typename T, typename... SymbolTypes>
-    class Binding : public BindingTo<T, SymbolTypes...> {
+    class Binding : public BindingTo<typename T::value, SymbolTypes...> {
         public:
-            inline T resolve(const Context<SymbolTypes...>& context) const {
+            inline typename T::value resolve(const Context<SymbolTypes...>& context) const {
                 if (!this->resolver_) {
                     throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
                 }
@@ -436,7 +438,7 @@ namespace mosure::inversify {
 
             using BindingMap = std::tuple<
                 inversify::Binding<
-                    typename SymbolTypes::value,
+                    SymbolTypes,
                     SymbolTypes...
                 >...
             >;
@@ -449,7 +451,7 @@ namespace mosure::inversify {
                 );
 
                 return std::get<
-                    inversify::Binding<typename T::value, SymbolTypes...>
+                    inversify::Binding<T, SymbolTypes...>
                 >(bindings_);
             }
 
@@ -461,7 +463,7 @@ namespace mosure::inversify {
                 );
 
                 return std::get<
-                    inversify::Binding<typename T::value, SymbolTypes...>
+                    inversify::Binding<T, SymbolTypes...>
                 >(bindings_).resolve(context_);
             }
 

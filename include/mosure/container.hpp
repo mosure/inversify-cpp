@@ -30,7 +30,7 @@ namespace mosure::inversify {
 
             using BindingMap = std::tuple<
                 inversify::Binding<
-                    typename SymbolTypes::value,
+                    SymbolTypes,
                     SymbolTypes...
                 >...
             >;
@@ -43,7 +43,7 @@ namespace mosure::inversify {
                 );
 
                 return std::get<
-                    inversify::Binding<typename T::value, SymbolTypes...>
+                    inversify::Binding<T, SymbolTypes...>
                 >(bindings_);
             }
 
@@ -55,7 +55,7 @@ namespace mosure::inversify {
                 );
 
                 return std::get<
-                    inversify::Binding<typename T::value, SymbolTypes...>
+                    inversify::Binding<T, SymbolTypes...>
                 >(bindings_).resolve(context_);
             }
 

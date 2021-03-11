@@ -43,9 +43,9 @@ namespace mosure::inversify {
     };
 
     template <typename T, typename... SymbolTypes>
-    class Binding : public BindingTo<T, SymbolTypes...> {
+    class Binding : public BindingTo<typename T::value, SymbolTypes...> {
         public:
-            inline T resolve(const Context<SymbolTypes...>& context) const {
+            inline typename T::value resolve(const Context<SymbolTypes...>& context) const {
                 if (!this->resolver_) {
                     throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
                 }
