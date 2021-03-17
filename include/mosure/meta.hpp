@@ -56,18 +56,6 @@ namespace mosure::inversify::meta {
     template <typename T>
     struct is_shared_ptr<std::shared_ptr<T>> : std::true_type { };
 
-    template <typename T>
-    struct is_smart_ptr : std::false_type { };
-
-    template <
-        typename T,
-        typename D
-    >
-    struct is_smart_ptr<std::unique_ptr<T, D>> : std::true_type { };
-
-    template <typename T>
-    struct is_smart_ptr<std::shared_ptr<T>> : std::true_type { };
-
 
     template <typename ...Types>
     inline constexpr bool valid_symbol_types_v = std::conjunction_v<
