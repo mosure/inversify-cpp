@@ -10,7 +10,7 @@ namespace mosure::inversify {
 
     template <typename... SymbolTypes>
     struct Context {
-        const inversify::IContainer<Container, SymbolTypes...>& container;
+        inversify::IContainer<Container, SymbolTypes...>& container;
     };
 
 }

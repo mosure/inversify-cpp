@@ -23,6 +23,6 @@ namespace mosure::inversify {
     };
 
     template <typename Implementation, typename Inject = inversify::Inject<>>
-    struct Injectable : Inject { };
+    struct Injectable: Inject { };
 
 }

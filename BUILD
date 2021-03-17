@@ -23,6 +23,7 @@ cc_library(
         "-Wall",
         "-Wextra",
         "-Wshadow",
+        "-Wunused",
     ],
     hdrs = glob([
         "include/**/*.hpp",

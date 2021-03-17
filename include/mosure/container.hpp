@@ -10,12 +10,9 @@
 
 namespace mosure::inversify {
 
-    using KeyType = int;
-
     template <typename... SymbolTypes>
     class Container
-        :
-        public inversify::IContainer<Container, SymbolTypes...> 
+        : public inversify::IContainer<Container, SymbolTypes...> 
     {
         public:
             static_assert(
@@ -48,7 +45,7 @@ namespace mosure::inversify {
             }
 
             template <typename T>
-            inline typename T::value get() const {
+            inline typename T::value get() {
                 static_assert(
                     meta::contains_v<T, SymbolTypes...>,
                     "inversify::Container symbol not registered"
