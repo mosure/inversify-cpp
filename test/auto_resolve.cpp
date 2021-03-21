@@ -1,9 +1,9 @@
+#define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
 #include <mosure/inversify.hpp>
 
 #include "mock/fizz.hpp"
-#include "mock/ifizz.hpp"
 #include "mock/symbols.hpp"
 
 
@@ -12,7 +12,12 @@ namespace inversify = mosure::inversify;
 SCENARIO("container resolves automatic values", "[resolve]") {
 
     GIVEN("A container with automatic unique_ptr binding") {
-        inversify::Container container;
+        inversify::Container<
+            symbols::foo,
+            symbols::bar,
+            symbols::autoFizzUnique,
+            symbols::autoFizzShared
+        > container;
 
         container.bind<symbols::foo>().toConstantValue(10);
         container.bind<symbols::bar>().toConstantValue(1.618);
@@ -45,7 +50,12 @@ SCENARIO("container resolves automatic values", "[resolve]") {
     }
 
     GIVEN("A container with automatic singleton shared_ptr binding") {
-        inversify::Container container;
+        inversify::Container<
+            symbols::foo,
+            symbols::bar,
+            symbols::autoFizzUnique,
+            symbols::autoFizzShared
+        > container;
 
         container.bind<symbols::foo>().toConstantValue(10);
         container.bind<symbols::bar>().toConstantValue(1.618);

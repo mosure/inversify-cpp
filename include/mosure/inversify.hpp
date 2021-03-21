@@ -33,7 +33,7 @@ SOFTWARE.
 #include <stdexcept>        // runtime_error
 #include <string>           // string
 #include <tuple>            // make_from_tuple, tuple
-#include <type_traits>      // apply, conjunction_v, false_type, true_type
+#include <type_traits>      // apply, conjunction_v, disjunction_v, false_type, is_copy_constructable, is_same, true_type
 
 #include <mosure/binding.hpp>
 #include <mosure/container.hpp>

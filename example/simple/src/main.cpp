@@ -11,7 +11,11 @@
 namespace inversify = mosure::inversify;
 
 int main() {
-    inversify::Container container;
+    inversify::Container<
+        symbols::logger,
+        symbols::service,
+        symbols::settings
+    > container;
 
     container.bind<symbols::logger>().to<Logger>().inSingletonScope();
     container.bind<symbols::service>().to<Service>();

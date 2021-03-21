@@ -1,12 +1,12 @@
 #include <functional>
 #include <memory>
 
+#define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
 #include <mosure/inversify.hpp>
 
 #include "mock/fizz.hpp"
-#include "mock/ifizz.hpp"
 #include "mock/symbols.hpp"
 
 
@@ -15,11 +15,16 @@ namespace inversify = mosure::inversify;
 SCENARIO("container resolves dynamic values", "[resolve]") {
 
     GIVEN("A container with dynamic binding") {
-        inversify::Container container;
+        inversify::Container<
+            symbols::foo,
+            symbols::bar,
+            symbols::fizz,
+            symbols::fizzFactory
+        > container;
 
         container.bind<symbols::foo>().toConstantValue(3);
-        container.bind<symbols::bar>().toDynamicValue([](const inversify::Context& ctx) {
-            auto foo = ctx.container.get<symbols::foo>();
+        container.bind<symbols::bar>().toDynamicValue([](auto& ctx) {
+            auto foo = ctx.container.template get<symbols::foo>();
 
             return foo * 1.5;
         });
@@ -33,8 +38,8 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
         }
 
         WHEN("the binding is redefined") {
-            container.bind<symbols::bar>().toDynamicValue([](const inversify::Context& ctx) {
-                auto foo = ctx.container.get<symbols::foo>();
+            container.bind<symbols::bar>().toDynamicValue([](auto& ctx) {
+                auto foo = ctx.container.template get<symbols::foo>();
 
                 return foo * 2.5;
             });
@@ -50,16 +55,21 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     }
 
     GIVEN("A container with factory binding") {
-        inversify::Container container;
+        inversify::Container<
+            symbols::foo,
+            symbols::bar,
+            symbols::fizz,
+            symbols::fizzFactory
+        > container;
 
         container.bind<symbols::foo>().toConstantValue(10);
         container.bind<symbols::bar>().toConstantValue(1.618);
 
         container.bind<symbols::fizzFactory>().toDynamicValue(
-            [](const inversify::Context& ctx) {
+            [](auto& ctx) {
                 return [&]() {
-                    auto foo = ctx.container.get<symbols::foo>();
-                    auto bar = ctx.container.get<symbols::bar>();
+                    auto foo = ctx.container.template get<symbols::foo>();
+                    auto bar = ctx.container.template get<symbols::bar>();
 
                     auto fizz = std::make_unique<Fizz>(foo, bar);
 
@@ -85,15 +95,20 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     }
 
     GIVEN("A container with singleton dynamic binding") {
-        inversify::Container container;
+        inversify::Container<
+            symbols::foo,
+            symbols::bar,
+            symbols::fizz,
+            symbols::fizzFactory
+        > container;
 
         container.bind<symbols::foo>().toConstantValue(10);
         container.bind<symbols::bar>().toConstantValue(1.618);
 
         container.bind<symbols::fizz>().toDynamicValue(
-            [](const inversify::Context& ctx) {
-                auto foo = ctx.container.get<symbols::foo>();
-                auto bar = ctx.container.get<symbols::bar>();
+            [](auto& ctx) {
+                auto foo = ctx.container.template get<symbols::foo>();
+                auto bar = ctx.container.template get<symbols::bar>();
 
                 auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -112,15 +127,20 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
     }
 
     GIVEN("A container with resolution dynamic binding") {
-        inversify::Container container;
+        inversify::Container<
+            symbols::foo,
+            symbols::bar,
+            symbols::fizz,
+            symbols::fizzFactory
+        > container;
 
         container.bind<symbols::foo>().toConstantValue(10);
         container.bind<symbols::bar>().toConstantValue(1.618);
 
         container.bind<symbols::fizz>().toDynamicValue(
-            [](const inversify::Context& ctx) {
-                auto foo = ctx.container.get<symbols::foo>();
-                auto bar = ctx.container.get<symbols::bar>();
+            [](auto& ctx) {
+                auto foo = ctx.container.template get<symbols::foo>();
+                auto bar = ctx.container.template get<symbols::bar>();
 
                 auto fizz = std::make_unique<Fizz>(foo, bar);
 

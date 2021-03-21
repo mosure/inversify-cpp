@@ -33,13 +33,13 @@ SOFTWARE.
 #include <stdexcept>        // runtime_error
 #include <string>           // string
 #include <tuple>            // make_from_tuple, tuple
-#include <type_traits>      // apply, conjunction_v, false_type, true_type
+#include <type_traits>      // apply, conjunction_v, disjunction_v, false_type, is_copy_constructable, is_same, true_type
 
 // #include <mosure/binding.hpp>
 
 
 #include <functional>
-#include <memory>
+#include <type_traits>
 
 // #include <mosure/context.hpp>
 
@@ -53,13 +53,17 @@ SOFTWARE.
 
 
 #include <type_traits>
+#include <variant>
 
 
 namespace mosure::inversify {
 
     template <typename Interface>
     struct Symbol {
-        static_assert(!std::is_abstract<Interface>(), "inversify::Container cannot bind/get abstract class value (use a smart pointer instead).");
+        static_assert(
+            !std::is_abstract<Interface>(),
+            "inversify::Container cannot bind/get abstract class value (use a smart pointer instead)."
+        );
 
         using value = Interface;
     };
@@ -70,22 +74,28 @@ namespace mosure::inversify {
 
 namespace mosure::inversify {
 
-    template <typename T>
+    template <
+        typename T,
+        typename... SymbolTypes
+    >
     class BindingTo;
 
-    template <typename Implementation>
+    template <
+        template <typename...> class Implementation,
+        typename... SymbolTypes
+    >
     class IContainer {
         public:
             template <typename T>
-            inversify::BindingTo<typename T::value>& bind() {
-                auto crtpImplementation = static_cast<Implementation const *>(this);
+            inversify::BindingTo<typename T::value, SymbolTypes...>& bind() {
+                auto crtpImplementation = static_cast<Implementation<SymbolTypes...> *>(this);
 
                 return crtpImplementation->template bind<T>();
             }
 
             template <typename T>
-            typename T::value get() const {
-                auto crtpImplementation = static_cast<Implementation const *>(this);
+            typename T::value get() {
+                auto crtpImplementation = static_cast<Implementation<SymbolTypes...> *>(this);
 
                 return crtpImplementation->template get<T>();
             }
@@ -97,10 +107,12 @@ namespace mosure::inversify {
 
 namespace mosure::inversify {
 
+    template <typename... SymbolTypes>
     class Container;
 
+    template <typename... SymbolTypes>
     struct Context {
-        const inversify::IContainer<Container>& container;
+        inversify::IContainer<Container, SymbolTypes...>& container;
     };
 
 }
@@ -116,15 +128,14 @@ namespace mosure::inversify {
 
 namespace mosure::inversify {
 
-    template <typename T>
-    using Factory = std::function<T(const inversify::Context&)>;
+    template <typename T, typename... SymbolTypes>
+    using Factory = std::function<T(const inversify::Context<SymbolTypes...>&)>;
 
 }
 
 // #include <mosure/resolver.hpp>
 
 
-#include <atomic>
 #include <memory>
 #include <tuple>
 #include <type_traits>
@@ -144,29 +155,72 @@ namespace mosure::inversify {
 // #include <mosure/meta.hpp>
 
 
+#include <memory>
 #include <type_traits>
 #include <utility>
+
+// #include <mosure/symbol.hpp>
+
 
 
 namespace mosure::inversify::meta {
 
-    template <class T, template <class...> class Template>
-    struct is_specialization : std::false_type { };
-
-    template <template <class...> class Template, class... Args>
-    struct is_specialization<Template<Args...>, Template> : std::true_type { };
-
-    template <typename ...Types>
-    inline constexpr bool valid_inject_types_v = std::conjunction_v<
-        meta::is_specialization<Types, Symbol>...
+    template<
+        typename T,
+        typename... Types
+    >
+    inline constexpr bool contains_v = std::disjunction_v<
+        std::is_same<T, Types>...
     >;
 
+
+    template <typename... Args>
+    struct is_empty : std::false_type { };
+
+    template<>
+    struct is_empty<> : std::true_type { };
+
+    template <typename... Args>
+    inline constexpr bool is_empty_v = is_empty<Args...>::value;
+
+
+    template <
+        typename T,
+        template <typename...> typename Template
+    >
+    struct is_specialization : std::false_type { };
+
+    template <
+        template <typename...> typename Template,
+        typename... Args
+    >
+    struct is_specialization<Template<Args...>, Template> : std::true_type { };
+
+
     template <typename T>
-    using value_t = typename T::value;
+    struct is_unique_ptr : std::false_type { };
+
+    template <
+        typename T,
+        typename D
+    >
+    struct is_unique_ptr<std::unique_ptr<T, D>> : std::true_type { };
+
+    template <typename T>
+    struct is_shared_ptr : std::false_type { };
+
+    template <typename T>
+    struct is_shared_ptr<std::shared_ptr<T>> : std::true_type { };
+
+
+    template <typename ...Types>
+    inline constexpr bool valid_symbol_types_v = std::conjunction_v<
+        meta::is_specialization<Types, inversify::Symbol>...
+    > || std::conjunction_v<
+        std::is_base_of<inversify::Symbol<typename Types::value>, Types>...
+    >;
 
 }
-
-// #include <mosure/symbol.hpp>
 
 
 
@@ -174,18 +228,68 @@ namespace mosure::inversify {
 
     template <typename... Dependencies>
     struct Inject {
-        static_assert(meta::valid_inject_types_v<Dependencies...>, "inversify::Injectable dependencies must be of type inversify::Symbol");
+        static_assert(
+            meta::valid_symbol_types_v<Dependencies...>,
+            "inversify::Injectable dependencies must be of type inversify::Symbol"
+        );
 
-        inline static auto resolve(const inversify::Context& context) {
-            return std::make_tuple(context.container.get<Dependencies>()...);
+        template <typename... SymbolTypes>
+        inline static auto resolve(const inversify::Context<SymbolTypes...>& context) {
+            return std::make_tuple(context.container.template get<Dependencies>()...);
         }
     };
 
-    template <typename Implementation>
-    struct Injectable {
-        using Inject = inversify::Inject<>;
-    };
+    template <typename Implementation, typename Inject = inversify::Inject<>>
+    struct Injectable: Inject { };
 
+}
+
+// #include <mosure/meta.hpp>
+
+
+
+namespace mosure::inversify {
+
+    template <
+        typename T,
+        typename U,
+        typename... SymbolTypes
+    >
+    inline static inversify::Factory<T, SymbolTypes...> get_auto_resolver() {
+        if constexpr (meta::is_unique_ptr<T>::value) {
+            return [](const inversify::Context<SymbolTypes...>& context) {
+                auto expansion = [](auto&& ... deps){
+                    return std::make_unique<U>(deps...);
+                };
+
+                return std::apply(
+                    expansion,
+                    std::move(
+                        inversify::Injectable<U>::resolve(context)
+                    )
+                );
+            };
+        } else if constexpr (meta::is_shared_ptr<T>::value) {
+            return [](const inversify::Context<SymbolTypes...>& context) {
+                auto expansion = [](auto&& ... deps){
+                    return std::make_shared<U>(deps...);
+                };
+
+                return std::apply(
+                    expansion,
+                    std::move(
+                        inversify::Injectable<U>::resolve(context)
+                    )
+                );
+            };
+        } else {
+            return [](const inversify::Context<SymbolTypes...>& context) {
+                return std::make_from_tuple<U>(
+                    inversify::Injectable<U>::resolve(context)
+                );
+            };
+        }
+    }
 }
 
 // #include <mosure/exceptions/resolution.hpp>
@@ -207,153 +311,63 @@ namespace mosure::inversify::exceptions {
 
 namespace mosure::inversify {
 
-    template <typename T>
-    class Resolver {
-        public:
-            virtual T resolve(const inversify::Context&) = 0;
-    };
-
-    template <typename T>
-    using ResolverPtr = std::shared_ptr<Resolver<T>>;
-
-    template <typename T>
-    class ConstantResolver : public Resolver<T> {
-        public:
-            explicit ConstantResolver(T value) : value_(value) { }
-
-            T resolve(const inversify::Context&) override {
-                return value_;
-            }
-
-        private:
-            T value_;
-    };
-
-    template <typename T>
-    class DynamicResolver : public Resolver<T> {
-        public:
-            explicit DynamicResolver(inversify::Factory<T> factory) : factory_(factory) { }
-
-            T resolve(const inversify::Context& context) override {
-                return factory_(context);
-            }
-
-        private:
-            inversify::Factory<T> factory_;
-    };
-
-    template <typename T, typename U, typename = void>
-    class AutoResolver;
-
-    template <typename T, typename U>
-    class AutoResolver<T, U> : public Resolver<T> {
-        public:
-            T resolve(const inversify::Context& context) override {
-                return std::make_from_tuple<U>(inversify::Injectable<U>::Inject::resolve(context));
-            }
-    };
-
-    // unique_ptr specialization
-    template <
-        typename T,
-        typename U
-    >
-    class AutoResolver<std::unique_ptr<T>, U> : public Resolver<std::unique_ptr<T>> {
-        public:
-            std::unique_ptr<T> resolve(const inversify::Context& context) override {
-                auto expansion = [&context](auto&& ... deps){
-                    return std::make_unique<U>(deps...);
-                };
-
-                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
-            }
-    };
-
-    // shared_ptr specialization
-    template <
-        typename T,
-        typename U
-    >
-    class AutoResolver<std::shared_ptr<T>, U> : public Resolver<std::shared_ptr<T>> {
-        public:
-            std::shared_ptr<T> resolve(const inversify::Context& context) override {
-                auto expansion = [&context](auto&& ... deps){
-                    return std::make_shared<U>(deps...);
-                };
-
-                return std::apply(expansion, std::move(inversify::Injectable<U>::Inject::resolve(context)));
-            }
-    };
-
-    template <typename T>
-    class CachedResolver : public Resolver<T> {
-        static_assert(std::is_copy_constructible_v<T>, "inversify::CachedResolver requires a copy constructor. Are you caching a unique_ptr?");
-
-        public:
-            explicit CachedResolver(ResolverPtr<T> parent) : parent_(parent) { }
-
-            T resolve(const inversify::Context& context) override {
-                if (!hasCached_) {
-                    hasCached_ = true;
-                    cached_ = parent_->resolve(context);
-                }
-
-                return cached_;
-            }
-
-        private:
-            T cached_;
-            std::atomic<bool> hasCached_ { false };
-            ResolverPtr<T> parent_;
-    };
-
-}
-
-
-
-namespace mosure::inversify {
-
-    template <typename T>
+    template <typename T, typename... SymbolTypes>
     class BindingScope {
         public:
             void inSingletonScope() {
-                resolver_ = std::make_shared<inversify::CachedResolver<T>>(resolver_);
+                static_assert(
+                    std::is_copy_constructible<T>::value,
+                    "inversify::BindingScope singleton must have copy constructor"
+                );
+
+                this->factory_ = [this, factory = std::move(factory_)](auto& context) {
+                    if (!this->cached_set_) {
+                        this->cached_ = factory(context);
+                        this->cached_set_ = true;
+                    }
+
+                    return this->cached_;
+                };
             }
 
         protected:
-            inversify::ResolverPtr<T> resolver_;
+            T cached_;
+            bool cached_set_ { false };
+            inversify::Factory<T, SymbolTypes...> factory_;
     };
 
-    template <typename T>
-    class BindingTo : public BindingScope<T> {
+    template <typename T, typename... SymbolTypes>
+    class BindingTo
+        : public BindingScope<T, SymbolTypes...>
+    {
         public:
             void toConstantValue(T&& value) {
-                this->resolver_ = std::make_shared<inversify::ConstantResolver<T>>(value);
+                this->factory_ = [val = std::move(value)](auto&) {
+                    return val;
+                };
             }
 
-            BindingScope<T>& toDynamicValue(inversify::Factory<T> factory) {
-                this->resolver_ = std::make_shared<inversify::DynamicResolver<T>>(factory);
+            BindingScope<T, SymbolTypes...>& toDynamicValue(inversify::Factory<T, SymbolTypes...>&& factory) {
+                this->factory_ = std::move(factory);
 
                 return *this;
             }
 
             template <typename U>
-            BindingScope<T>& to() {
-                this->resolver_ = std::make_shared<inversify::AutoResolver<T, U>>();
+            BindingScope<T, SymbolTypes...>& to() {
+                this->factory_ = inversify::get_auto_resolver<T, U, SymbolTypes...>();
 
                 return *this;
             }
     };
 
-    template <typename T>
-    class Binding : public BindingTo<T> {
+    template <typename T, typename... SymbolTypes>
+    class Binding
+        : public BindingTo<typename T::value, SymbolTypes...>
+    {
         public:
-            T resolve(const Context& context) const {
-                if (!this->resolver_) {
-                    throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
-                }
-
-                return this->resolver_->resolve(context);
+            inline typename T::value resolve(const inversify::Context<SymbolTypes...>& context) {
+                return this->factory_(context);
             }
     };
 
@@ -362,35 +376,69 @@ namespace mosure::inversify {
 // #include <mosure/container.hpp>
 
 
+#include <tuple>
+
 // #include <mosure/binding.hpp>
 
 // #include <mosure/context.hpp>
 
 // #include <mosure/interfaces/icontainer.hpp>
 
+// #include <mosure/meta.hpp>
+
 
 
 namespace mosure::inversify {
 
-    template <typename Symbol>
-    struct BindingLookup {
-        inline static inversify::Binding<typename Symbol::value> binding {};
-    };
-
-    class Container : public inversify::IContainer<Container> {
+    template <typename... SymbolTypes>
+    class Container
+        : public inversify::IContainer<Container, SymbolTypes...> 
+    {
         public:
+            static_assert(
+                meta::valid_symbol_types_v<SymbolTypes...>,
+                "inversify::Container symbols must be of type inversify::Symbol"
+            );
+
+            static_assert(
+                !meta::is_empty_v<SymbolTypes...>,
+                "inversify::Container must register at least one symbol"
+            );
+
+            using BindingMap = std::tuple<
+                inversify::Binding<
+                    SymbolTypes,
+                    SymbolTypes...
+                >...
+            >;
+
             template <typename T>
-            inversify::BindingTo<typename T::value>& bind() {
-                return BindingLookup<T>::binding;
+            inline inversify::BindingTo<typename T::value, SymbolTypes...>& bind() {
+                static_assert(
+                    meta::contains_v<T, SymbolTypes...>,
+                    "inversify::Container symbol not registered"
+                );
+
+                return std::get<
+                    inversify::Binding<T, SymbolTypes...>
+                >(bindings_);
             }
 
             template <typename T>
-            typename T::value get() const {
-                return BindingLookup<T>::binding.resolve(context_);
+            inline typename T::value get() {
+                static_assert(
+                    meta::contains_v<T, SymbolTypes...>,
+                    "inversify::Container symbol not registered"
+                );
+
+                return std::get<
+                    inversify::Binding<T, SymbolTypes...>
+                >(bindings_).resolve(context_);
             }
 
         private:
-            inversify::Context context_ { *this };
+            BindingMap bindings_ {};
+            inversify::Context<SymbolTypes...> context_ { *this };
     };
 
 }

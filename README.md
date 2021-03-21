@@ -13,6 +13,10 @@
 
 C++17 inversion of control and dependency injection container library.
 
+## Containerless Version
+
+See the [`containerless` branch](https://github.com/mosure/inversify-cpp/tree/containerless) for a static binding (containerless) version of the library.
+
 ## Features
 *   Constant, dynamic, and automatic resolvers
 *   Singleton, resolution (TODO), and unique scopes
@@ -70,6 +74,8 @@ namespace symbols {
 }
 
 ```
+
+> Note: symbols which hold the same interface type may do so via structs which inherit inversify::Symbol
 
 #### Declare Classes and Dependencies
 
@@ -135,9 +141,9 @@ Singleton scope dynamic bindings cache the first resolution of the binding.
 ```cpp
 
 container.bind<symbols::fizz>().toDynamicValue(
-    [](const inversify::Context& ctx) {
-        auto foo = ctx.container.get<symbols::foo>();
-        auto bar = ctx.container.get<symbols::bar>();
+    [](auto& ctx) {
+        auto foo = ctx.container.template get<symbols::foo>();
+        auto bar = ctx.container.template get<symbols::bar>();
 
         auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -154,10 +160,10 @@ Dynamic bindings can be used to resolve factory functions.
 ```cpp
 
 container.bind<symbols::fizzFactory>().toDynamicValue(
-    [](const inversify::Context& ctx) {
+    [](auto& ctx) {
         return [&]() {
-            auto foo = ctx.container.get<symbols::foo>();
-            auto bar = ctx.container.get<symbols::bar>();
+            auto foo = ctx.container.template get<symbols::foo>();
+            auto bar = ctx.container.template get<symbols::bar>();
 
             auto fizz = std::make_shared<Fizz>(foo, bar);
 
@@ -209,11 +215,18 @@ Use the following to run tests:
 
 `bazel run test --enable_platform_specific_config`
 
-> Note: run the example app in a similar way: `bazel run example --enable_platform_specific_config`
+> Note: run the example app in a similar way: `bazel run example/simple --enable_platform_specific_config`
 
 ## TODOS
 *   More compile-time checks
 *   Resolution scope
+
+### Profiling
+
+Run the following to generate a callgrind file:
+
+*   `bazel run example/profiling --enable_platform_specific_config --compilation_mode=dbg -s`
+*   `valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./bazel-bin/example/profiling/profiling`
 
 ## Generating `single_include` Variant
 
