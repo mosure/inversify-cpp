@@ -226,7 +226,6 @@ Use the following to run tests:
 Run the following to generate a callgrind file:
 
 *   `bazel run example/profiling --enable_platform_specific_config --compilation_mode=dbg -s`
-
 *   `valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./bazel-bin/example/profiling/profiling`
 
 ## Generating `single_include` Variant
