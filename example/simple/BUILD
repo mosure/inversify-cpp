@@ -2,7 +2,7 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 
 cc_library(
-    name = "example_api",
+    name = "simple_api",
     hdrs = glob([
         "api/*.hpp",
         "src/*.hpp",
@@ -14,7 +14,7 @@ cc_library(
 )
 
 cc_library(
-    name = "example_src_hdrs",
+    name = "simple_src_hdrs",
     hdrs = glob([
         "src/*.hpp",
     ]),
@@ -25,13 +25,13 @@ cc_library(
 )
 
 cc_binary(
-    name = "example",
+    name = "simple",
     srcs = glob([
         "src/*.cpp",
     ]),
     deps = [
-        ":example_api",
-        ":example_src_hdrs",
+        ":simple_api",
+        ":simple_src_hdrs",
         "//:inversify",
     ],
     visibility = ["//visibility:public"]

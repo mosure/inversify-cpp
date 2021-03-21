@@ -33,3 +33,5 @@
 
 .vscode/
 bazel-*
+
+callgrind.out.*

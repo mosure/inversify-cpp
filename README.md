@@ -18,6 +18,7 @@ C++17 inversion of control and dependency injection container library.
 See the [`containerless` branch](https://github.com/mosure/inversify-cpp/tree/containerless) for a static binding (containerless) version of the library.
 
 ## Features
+*   Constant, dynamic, and automatic resolvers
 *   Singleton, resolution (TODO), and unique scopes
 
 ## Documentation
@@ -214,11 +215,19 @@ Use the following to run tests:
 
 `bazel run test --enable_platform_specific_config`
 
-> Note: run the example app in a similar way: `bazel run example --enable_platform_specific_config`
+> Note: run the example app in a similar way: `bazel run example/simple --enable_platform_specific_config`
 
 ## TODOS
 *   More compile-time checks
 *   Resolution scope
+
+### Profiling
+
+Run the following to generate a callgrind file:
+
+*   `bazel run example/profiling --enable_platform_specific_config --compilation_mode=dbg -s`
+
+*   `valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./bazel-bin/example/profiling/profiling`
 
 ## Generating `single_include` Variant
 

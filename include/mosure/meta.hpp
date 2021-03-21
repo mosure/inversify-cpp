@@ -63,4 +63,5 @@ namespace mosure::inversify::meta {
     > || std::conjunction_v<
         std::is_base_of<inversify::Symbol<typename Types::value>, Types>...
     >;
+
 }

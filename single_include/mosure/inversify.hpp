@@ -219,6 +219,7 @@ namespace mosure::inversify::meta {
     > || std::conjunction_v<
         std::is_base_of<inversify::Symbol<typename Types::value>, Types>...
     >;
+
 }
 
 
@@ -310,24 +311,29 @@ namespace mosure::inversify::exceptions {
 
 namespace mosure::inversify {
 
-    enum BindingState {
-        unique,
-        singleton_uninitialized,
-        singleton_initialized
-    };
-
     template <typename T, typename... SymbolTypes>
     class BindingScope {
         public:
             void inSingletonScope() {
-                state_ = BindingState::singleton_uninitialized;
+                static_assert(
+                    std::is_copy_constructible<T>::value,
+                    "inversify::BindingScope singleton must have copy constructor"
+                );
+
+                this->factory_ = [this, factory = std::move(factory_)](auto& context) {
+                    if (!this->cached_set_) {
+                        this->cached_ = factory(context);
+                        this->cached_set_ = true;
+                    }
+
+                    return this->cached_;
+                };
             }
 
         protected:
             T cached_;
+            bool cached_set_ { false };
             inversify::Factory<T, SymbolTypes...> factory_;
-            bool initialized_ { false };
-            BindingState state_ { BindingState::unique };
     };
 
     template <typename T, typename... SymbolTypes>
@@ -336,14 +342,13 @@ namespace mosure::inversify {
     {
         public:
             void toConstantValue(T&& value) {
-                this->state_ = BindingState::singleton_initialized;
-                this->cached_ = std::move(value);
-                this->initialized_ = true;
+                this->factory_ = [val = std::move(value)](auto&) {
+                    return val;
+                };
             }
 
-            BindingScope<T, SymbolTypes...>& toDynamicValue(inversify::Factory<T, SymbolTypes...> factory) {
-                this->factory_ = factory;
-                this->initialized_ = true;
+            BindingScope<T, SymbolTypes...>& toDynamicValue(inversify::Factory<T, SymbolTypes...>&& factory) {
+                this->factory_ = std::move(factory);
 
                 return *this;
             }
@@ -351,7 +356,6 @@ namespace mosure::inversify {
             template <typename U>
             BindingScope<T, SymbolTypes...>& to() {
                 this->factory_ = inversify::get_auto_resolver<T, U, SymbolTypes...>();
-                this->initialized_ = true;
 
                 return *this;
             }
@@ -363,20 +367,6 @@ namespace mosure::inversify {
     {
         public:
             inline typename T::value resolve(const inversify::Context<SymbolTypes...>& context) {
-                if (!this->initialized_) {
-                    throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
-                }
-
-                if constexpr (std::is_copy_constructible<typename T::value>::value) {
-                    switch (this->state_) {
-                        case BindingState::singleton_uninitialized:
-                            this->cached_ = this->factory_(context);
-                            this->state_ = BindingState::singleton_initialized;
-                        case BindingState::singleton_initialized:
-                            return this->cached_;
-                    }
-                }
-
                 return this->factory_(context);
             }
     };
