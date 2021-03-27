@@ -115,7 +115,10 @@ struct inversify::Injectable<Fizz>
 
 ```cpp
 
-inversify::Container container;
+inversify::Container<
+    symbols::foo,
+    symbols::bar
+> container;
 
 ```
 
