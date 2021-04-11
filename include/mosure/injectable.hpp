@@ -16,6 +16,10 @@ struct Inject {
         "inversify::Injectable dependencies must be of type inversify::Symbol"
     );
 
+#ifdef INVERSIFY_BINDING_INSPECTION
+    inline static std::tuple<Dependencies...> dependencies;
+#endif
+
     template <typename... SymbolTypes>
     inline static auto resolve(const inversify::Context<SymbolTypes...>& context) {
         return std::make_tuple(context.container.template get<Dependencies>()...);

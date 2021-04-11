@@ -18,9 +18,11 @@ public:
         resolver_ = std::make_shared<inversify::CachedResolver<T, SymbolTypes...>>(resolver_);
     }
 
+#ifdef INVERSIFY_BINDING_INSPECTION
     auto getResolver() const {
         return resolver_;
     }
+#endif
 
 protected:
     inversify::ResolverPtr<T, SymbolTypes...> resolver_;

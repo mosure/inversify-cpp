@@ -92,7 +92,6 @@ SCENARIO("container resolves automatic values", "[resolve]") {
         inversify::Container<
             symbols::foo,
             symbols::bar,
-            symbols::autoFizzUnique,
             symbols::autoFizzShared,
             symbols::autoQuxUnique
         > container;
