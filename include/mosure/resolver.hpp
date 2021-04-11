@@ -34,20 +34,19 @@ class DependencyTuple {
 public:
     template <typename Symbol>
     auto get() {
-        return std::get<Dependency<Symbol>>(values_);
+        return std::get<Dependency<Symbol>>(values);
     }
 
     template <typename Symbol>
     void set(bool value) {
-        std::get<Dependency<Symbol>>(values_).dependent = value;
+        std::get<Dependency<Symbol>>(values).dependent = value;
     }
 
-private:
     std::tuple<
         inversify::Dependency<
             SymbolTypes
         >...
-    > values_;
+    > values;
 };
 #endif
 
