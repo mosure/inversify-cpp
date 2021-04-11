@@ -7,31 +7,31 @@
 
 namespace mosure::inversify {
 
-    template <
-        typename T,
-        typename... SymbolTypes
-    >
-    class BindingTo;
+template <
+    typename T,
+    typename... SymbolTypes
+>
+class BindingTo;
 
-    template <
-        template <typename...> class Implementation,
-        typename... SymbolTypes
-    >
-    class IContainer {
-        public:
-            template <typename T>
-            inversify::BindingTo<typename T::value, SymbolTypes...>& bind() {
-                auto crtpImplementation = static_cast<Implementation<SymbolTypes...> *>(this);
+template <
+    template <typename...> class Implementation,
+    typename... SymbolTypes
+>
+class IContainer {
+public:
+    template <typename T>
+    inversify::BindingTo<typename T::value, SymbolTypes...>& bind() {
+        auto crtpImplementation = static_cast<Implementation<SymbolTypes...> *>(this);
 
-                return crtpImplementation->template bind<T>();
-            }
+        return crtpImplementation->template bind<T>();
+    }
 
-            template <typename T>
-            typename T::value get() {
-                auto crtpImplementation = static_cast<Implementation<SymbolTypes...> *>(this);
+    template <typename T>
+    typename T::value get() {
+        auto crtpImplementation = static_cast<Implementation<SymbolTypes...> *>(this);
 
-                return crtpImplementation->template get<T>();
-            }
-    };
+        return crtpImplementation->template get<T>();
+    }
+};
 
 }

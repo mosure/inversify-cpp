@@ -7,7 +7,7 @@
 
 namespace mosure::inversify {
 
-    template <typename T, typename... SymbolTypes>
-    using Factory = std::function<T(const inversify::Context<SymbolTypes...>&)>;
+template <typename T, typename... SymbolTypes>
+using Factory = std::function<T(const inversify::Context<SymbolTypes...>&)>;
 
 }

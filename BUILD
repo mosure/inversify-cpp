@@ -47,6 +47,9 @@ cc_library(
 
 cc_binary(
     name = "test",
+    copts = [
+        "-DINVERSIFY_BINDING_INSPECTION",
+    ],
     srcs = glob([
         "test/**/*.cpp",
     ]),
