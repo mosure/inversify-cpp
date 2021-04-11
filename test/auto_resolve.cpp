@@ -4,6 +4,7 @@
 #include <mosure/inversify.hpp>
 
 #include "mock/fizz.hpp"
+#include "mock/qux.hpp"
 #include "mock/symbols.hpp"
 
 
@@ -83,6 +84,32 @@ SCENARIO("container resolves automatic values", "[resolve]") {
                 REQUIRE(result1->counter == 2);
                 REQUIRE(result2->counter == 2);
                 REQUIRE(result1 == result2);
+            }
+        }
+    }
+
+    GIVEN("A container with automatic nested bindings") {
+        inversify::Container<
+            symbols::foo,
+            symbols::bar,
+            symbols::autoFizzUnique,
+            symbols::autoFizzShared,
+            symbols::autoQuxUnique
+        > container;
+
+        container.bind<symbols::foo>().toConstantValue(10);
+        container.bind<symbols::bar>().toConstantValue(1.618);
+
+        container.bind<symbols::autoFizzShared>().to<Fizz>().inSingletonScope();
+
+        container.bind<symbols::autoQuxUnique>().to<Qux>();
+
+        WHEN("the dependency is resolved") {
+            auto result = container.get<symbols::autoQuxUnique>();
+            auto foo = result->buzz();
+
+            THEN("the correct value is returned") {
+                REQUIRE(foo == 15);
             }
         }
     }

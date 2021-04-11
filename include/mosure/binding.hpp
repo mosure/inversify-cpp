@@ -11,64 +11,56 @@
 
 namespace mosure::inversify {
 
-    template <typename T, typename... SymbolTypes>
-    class BindingScope {
-        public:
-            void inSingletonScope() {
-                static_assert(
-                    std::is_copy_constructible<T>::value,
-                    "inversify::BindingScope singleton must have copy constructor"
-                );
+template <typename T, typename... SymbolTypes>
+class BindingScope {
+public:
+    void inSingletonScope() {
+        resolver_ = std::make_shared<inversify::CachedResolver<T, SymbolTypes...>>(resolver_);
+    }
 
-                this->factory_ = [this, factory = std::move(factory_)](auto& context) {
-                    if (!this->cached_set_) {
-                        this->cached_ = factory(context);
-                        this->cached_set_ = true;
-                    }
+    auto getResolver() const {
+        return resolver_;
+    }
 
-                    return this->cached_;
-                };
-            }
+protected:
+    inversify::ResolverPtr<T, SymbolTypes...> resolver_;
+};
 
-        protected:
-            T cached_;
-            bool cached_set_ { false };
-            inversify::Factory<T, SymbolTypes...> factory_;
-    };
+template <typename T, typename... SymbolTypes>
+class BindingTo
+    : public BindingScope<T, SymbolTypes...>
+{
+public:
+    void toConstantValue(T&& value) {
+        this->resolver_ = std::make_shared<inversify::ConstantResolver<T, SymbolTypes...>>(value);
+    }
 
-    template <typename T, typename... SymbolTypes>
-    class BindingTo
-        : public BindingScope<T, SymbolTypes...>
-    {
-        public:
-            void toConstantValue(T&& value) {
-                this->factory_ = [val = std::move(value)](auto&) {
-                    return val;
-                };
-            }
+    BindingScope<T, SymbolTypes...>& toDynamicValue(inversify::Factory<T, SymbolTypes...>&& factory) {
+        this->resolver_ = std::make_shared<inversify::DynamicResolver<T, SymbolTypes...>>(factory);
 
-            BindingScope<T, SymbolTypes...>& toDynamicValue(inversify::Factory<T, SymbolTypes...>&& factory) {
-                this->factory_ = std::move(factory);
+        return *this;
+    }
 
-                return *this;
-            }
+    template <typename U>
+    BindingScope<T, SymbolTypes...>& to() {
+        this->resolver_ = std::make_shared<inversify::AutoResolver<T, U, SymbolTypes...>>();
 
-            template <typename U>
-            BindingScope<T, SymbolTypes...>& to() {
-                this->factory_ = inversify::get_auto_resolver<T, U, SymbolTypes...>();
+        return *this;
+    }
+};
 
-                return *this;
-            }
-    };
+template <typename T, typename... SymbolTypes>
+class Binding
+    : public BindingTo<typename T::value, SymbolTypes...>
+{
+public:
+    inline typename T::value resolve(const inversify::Context<SymbolTypes...>& context) {
+        if (!this->resolver_) {
+            throw inversify::exceptions::ResolutionException("inversify::Resolver not found. Malformed binding.");
+        }
 
-    template <typename T, typename... SymbolTypes>
-    class Binding
-        : public BindingTo<typename T::value, SymbolTypes...>
-    {
-        public:
-            inline typename T::value resolve(const inversify::Context<SymbolTypes...>& context) {
-                return this->factory_(context);
-            }
-    };
+        return this->resolver_->resolve(context);
+    }
+};
 
 }
