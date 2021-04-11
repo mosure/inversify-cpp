@@ -61,6 +61,11 @@ public:
 
 #ifdef INVERSIFY_BINDING_INSPECTION
     inline virtual std::string getResolverLabel() const = 0;
+
+    inline virtual std::string getImplementationLabel() const {
+        return typeid(T).name();
+    };
+
     inline virtual inversify::DependencyTuple<SymbolTypes...> getDependencies() const {
         return DependencyTuple<SymbolTypes...>{};
     }
@@ -89,7 +94,7 @@ public:
 
 #ifdef INVERSIFY_BINDING_INSPECTION
     inline virtual std::string getResolverLabel() const override {
-        return std::string("constant - ") + typeid(T).name();
+        return "constant";
     }
 #endif
 
@@ -113,7 +118,7 @@ public:
 
 #ifdef INVERSIFY_BINDING_INSPECTION
     inline virtual std::string getResolverLabel() const override {
-        return std::string("dynamic - ") + typeid(T).name();
+        return "dynamic";
     }
 #endif
 
@@ -135,7 +140,11 @@ class AutoResolverBase
 public:
 #ifdef INVERSIFY_BINDING_INSPECTION
     inline virtual std::string getResolverLabel() const override {
-        return std::string("auto - ") + typeid(U).name();
+        return "auto";
+    }
+
+    inline virtual std::string getImplementationLabel() const override {
+        return typeid(U).name();
     }
 
     inline virtual inversify::DependencyTuple<SymbolTypes...> getDependencies() const {
@@ -246,6 +255,10 @@ public:
 #ifdef INVERSIFY_BINDING_INSPECTION
     inline virtual std::string getResolverLabel() const override {
         return std::string("cached - ") + parent_->getResolverLabel();
+    }
+
+    inline virtual std::string getImplementationLabel() const override {
+        return parent_->getImplementationLabel();
     }
 #endif
 
