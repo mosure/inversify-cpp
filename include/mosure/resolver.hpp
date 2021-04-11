@@ -22,7 +22,7 @@ namespace mosure::inversify {
 #ifdef INVERSIFY_BINDING_INSPECTION
 template <typename Symbol>
 struct Dependency {
-    using value = Symbol;
+    using symbol = Symbol;
 
     operator bool() { return dependent; }
 
