@@ -17,7 +17,7 @@ struct Inject {
     );
 
 #ifdef INVERSIFY_BINDING_INSPECTION
-    inline static std::tuple<Dependencies...> dependencies;
+    using value = std::tuple<Dependencies...>;
 #endif
 
     template <typename... SymbolTypes>

@@ -159,7 +159,7 @@ public:
             return dep_tuple;
         };
 
-        return std::apply(unroll, inversify::Injectable<U>::dependencies);
+        return std::apply(unroll, typename inversify::Injectable<U>::value{});
     }
 #endif
 };
