@@ -26,7 +26,7 @@ See the [inversify-cpp-visualizer](https://github.com/mosure/inversify-cpp-visua
 ### Installation
 inversify-cpp supports conan. add `inversify-cpp/2.1.0` to your `conanfile.py`.
 
-view the library on [conan center](https://conan.io/center/inversify-cpp)
+view the library on [conan center](https://conan.io/center/recipes/inversify-cpp)
 
 ### Scope
 Scope manages the uniqueness of a dependency.
