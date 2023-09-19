@@ -6,7 +6,7 @@
 [![GitHub License](https://img.shields.io/github/license/mosure/inversify-cpp)](https://raw.githubusercontent.com/mosure/inversify-cpp/main/LICENSE)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/mosure/inversify-cpp)](https://github.com/mosure/inversify-cpp)
 [![GitHub Releases](https://img.shields.io/github/v/release/mosure/inversify-cpp?include_prereleases&sort=semver)](https://github.com/mosure/inversify-cpp/releases)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed98bee84ee14c8eb6ad6a0f85b94ca1)](https://www.codacy.com/gh/Mosure/inversify-cpp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mosure/inversify-cpp&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed98bee84ee14c8eb6ad6a0f85b94ca1)](https://app.codacy.com/gh/Mosure/inversify-cpp/dashboard)
 [![GitHub Downloads](https://img.shields.io/github/downloads/mosure/inversify-cpp/total)](https://github.com/mosure/inversify-cpp/releases)
 [![GitHub Issues](https://img.shields.io/github/issues/mosure/inversify-cpp)](https://github.com/mosure/inversify-cpp/issues)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mosure/inversify-cpp.svg)](http://isitmaintained.com/project/mosure/inversify-cpp "Average time to resolve an issue")
