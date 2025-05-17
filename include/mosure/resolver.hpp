@@ -26,7 +26,7 @@ struct Dependency {
 
     operator bool() { return dependent; }
 
-    bool dependent;
+    bool dependent { false };
 };
 
 template <typename... SymbolTypes>
