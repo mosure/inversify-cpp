@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <tuple>
 
 #include <mosure/binding.hpp>
@@ -51,9 +52,21 @@ public:
             "inversify::Container symbol not registered"
         );
 
-        return std::get<
+        auto* previousScope = context_.resolutionScope;
+        std::optional<inversify::ResolutionScope> scope;
+
+        if (previousScope == nullptr) {
+            scope.emplace();
+            context_.resolutionScope = &scope.value();
+        }
+
+        auto result = std::get<
             inversify::Binding<T, SymbolTypes...>
         >(bindings_).resolve(context_);
+
+        context_.resolutionScope = previousScope;
+
+        return result;
     }
 
 private:

@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <utility>
 
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
@@ -12,6 +13,28 @@
 
 
 namespace inversify = mosure::inversify;
+
+struct ScopedAggregator {
+    ScopedAggregator(ServiceAPtr first, ServiceAPtr second)
+        : first_(std::move(first)), second_(std::move(second))
+    { }
+
+    ServiceAPtr first_;
+    ServiceAPtr second_;
+};
+using ScopedAggregatorPtr = std::shared_ptr<ScopedAggregator>;
+
+namespace speed_symbols {
+    using aggregator = inversify::Symbol<ScopedAggregatorPtr>;
+}
+
+template <>
+struct inversify::Injectable<ScopedAggregator>
+    : inversify::Inject<
+        symbols::symbolA,
+        symbols::symbolA
+    >
+{ };
 
 SCENARIO("container resolves automatic values quickly", "[performance]") {
 
@@ -40,6 +63,22 @@ SCENARIO("container resolves automatic values quickly", "[performance]") {
                     )
                 )
             );
+        };
+    }
+
+    GIVEN("A container with resolution scoped reuse within a graph") {
+        inversify::Container<
+            symbols::foo,
+            symbols::symbolA,
+            speed_symbols::aggregator
+        > container;
+
+        container.bind<symbols::foo>().toConstantValue(10);
+        container.bind<symbols::symbolA>().to<ServiceA>().inResolutionScope();
+        container.bind<speed_symbols::aggregator>().to<ScopedAggregator>();
+
+        BENCHMARK("resolution scoped aggregator") {
+            return container.get<speed_symbols::aggregator>();
         };
     }
 }

@@ -33,7 +33,9 @@ SOFTWARE.
 #include <stdexcept>        // runtime_error
 #include <string>           // string
 #include <tuple>            // make_from_tuple, tuple
+#include <optional>         // optional
 #include <type_traits>      // apply, conjunction_v, disjunction_v, false_type, is_copy_constructable, is_same, true_type
+#include <unordered_map>    // unordered_map
 
 // #include <mosure/binding.hpp>
 
@@ -107,12 +109,52 @@ public:
 
 namespace mosure::inversify {
 
+class ResolutionScope {
+    struct CacheEntry {
+        virtual ~CacheEntry() = default;
+    };
+
+    template <typename T>
+    struct CacheValue : CacheEntry {
+        explicit CacheValue(T value)
+            : value_(std::move(value))
+        { }
+
+        const T& value() const { return value_; }
+
+    private:
+        T value_;
+    };
+
+public:
+    template <typename T>
+    bool contains(const void* key) const {
+        return cache_.find(key) != cache_.end();
+    }
+
+    template <typename T>
+    T get(const void* key) const {
+        return static_cast<CacheValue<T>*>(cache_.at(key).get())->value();
+    }
+
+    template <typename T>
+    void set(const void* key, T value) {
+        cache_[key] = std::make_unique<CacheValue<T>>(std::move(value));
+    }
+
+    void clear() { cache_.clear(); }
+
+private:
+    std::unordered_map<const void*, std::unique_ptr<CacheEntry>> cache_;
+};
+
 template <typename... SymbolTypes>
 class Container;
 
 template <typename... SymbolTypes>
 struct Context {
     inversify::IContainer<Container, SymbolTypes...>& container;
+    ResolutionScope* resolutionScope { nullptr };
 };
 
 }
@@ -507,6 +549,54 @@ private:
     ResolverPtr<T, SymbolTypes...> parent_;
 };
 
+template <
+    typename T,
+    typename... SymbolTypes
+>
+class ResolutionCachedResolver
+    : public Resolver<T, SymbolTypes...> {
+    static_assert(
+        std::is_copy_constructible_v<T>,
+        "inversify::ResolutionCachedResolver requires a copy constructor. Are you caching a unique_ptr?"
+    );
+
+public:
+    explicit ResolutionCachedResolver(ResolverPtr<T, SymbolTypes...> parent)
+        : parent_(std::move(parent))
+    { }
+
+    inline T resolve(const inversify::Context<SymbolTypes...>& context) override {
+        if (!context.resolutionScope) {
+            return parent_->resolve(context);
+        }
+
+        auto key = static_cast<const void*>(this);
+        auto& scope = *context.resolutionScope;
+
+        if (scope.template contains<T>(key)) {
+            return scope.template get<T>(key);
+        }
+
+        auto value = parent_->resolve(context);
+        scope.template set<T>(key, value);
+
+        return value;
+    }
+
+#ifdef INVERSIFY_BINDING_INSPECTION
+    inline virtual std::string getResolverLabel() const override {
+        return std::string("resolution - ") + parent_->getResolverLabel();
+    }
+
+    inline virtual std::string getImplementationLabel() const override {
+        return parent_->getImplementationLabel();
+    }
+#endif
+
+private:
+    ResolverPtr<T, SymbolTypes...> parent_;
+};
+
 }
 
 // #include <mosure/exceptions/resolution.hpp>
@@ -520,6 +610,10 @@ class BindingScope {
 public:
     void inSingletonScope() {
         resolver_ = std::make_shared<inversify::CachedResolver<T, SymbolTypes...>>(resolver_);
+    }
+
+    void inResolutionScope() {
+        resolver_ = std::make_shared<inversify::ResolutionCachedResolver<T, SymbolTypes...>>(resolver_);
     }
 
 #ifdef INVERSIFY_BINDING_INSPECTION
@@ -629,9 +723,21 @@ public:
             "inversify::Container symbol not registered"
         );
 
-        return std::get<
+        auto* previousScope = context_.resolutionScope;
+        std::optional<inversify::ResolutionScope> scope;
+
+        if (previousScope == nullptr) {
+            scope.emplace();
+            context_.resolutionScope = &scope.value();
+        }
+
+        auto result = std::get<
             inversify::Binding<T, SymbolTypes...>
         >(bindings_).resolve(context_);
+
+        context_.resolutionScope = previousScope;
+
+        return result;
     }
 
 private:

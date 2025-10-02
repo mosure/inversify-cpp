@@ -19,7 +19,7 @@ See the [inversify-cpp-visualizer](https://github.com/mosure/inversify-cpp-visua
 
 ## Features
 *   Constant, dynamic, and automatic resolvers
-*   Singleton, resolution (TODO), and unique scopes
+*   Singleton, resolution, and unique scopes
 
 ## Documentation
 
@@ -142,11 +142,24 @@ container.bind<symbols::bar>().toConstantValue(1.618);
 
 Dynamic bindings are resolved when calling `container.get...`.
 
-By default, dynamic bindings have resolution scope (e.g. each call to `container.get...` calls the factory).
+By default, dynamic bindings have unique scope (e.g. each call to `container.get...` calls the factory).
 
-Singleton scope dynamic bindings cache the first resolution of the binding.
+Resolution scope dynamic bindings cache values during a single resolution graph, ensuring duplicate dependencies resolve to the same value. Use `.inResolutionScope()` to enable this behaviour.
+
+Singleton scope dynamic bindings cache the first resolution of the binding across all calls.
 
 ```cpp
+
+container.bind<symbols::fizz>().toDynamicValue(
+    [](auto& ctx) {
+        auto foo = ctx.container.template get<symbols::foo>();
+        auto bar = ctx.container.template get<symbols::bar>();
+
+        auto fizz = std::make_shared<Fizz>(foo, bar);
+
+        return fizz;
+    }
+).inResolutionScope();
 
 container.bind<symbols::fizz>().toDynamicValue(
     [](auto& ctx) {

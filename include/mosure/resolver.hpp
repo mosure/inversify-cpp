@@ -4,6 +4,7 @@
 #include <memory>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 #ifdef INVERSIFY_BINDING_INSPECTION
 #include <string>
@@ -265,6 +266,54 @@ public:
 private:
     T cached_;
     std::atomic<bool> hasCached_ { false };
+    ResolverPtr<T, SymbolTypes...> parent_;
+};
+
+template <
+    typename T,
+    typename... SymbolTypes
+>
+class ResolutionCachedResolver
+    : public Resolver<T, SymbolTypes...> {
+    static_assert(
+        std::is_copy_constructible_v<T>,
+        "inversify::ResolutionCachedResolver requires a copy constructor. Are you caching a unique_ptr?"
+    );
+
+public:
+    explicit ResolutionCachedResolver(ResolverPtr<T, SymbolTypes...> parent)
+        : parent_(std::move(parent))
+    { }
+
+    inline T resolve(const inversify::Context<SymbolTypes...>& context) override {
+        if (!context.resolutionScope) {
+            return parent_->resolve(context);
+        }
+
+        auto key = static_cast<const void*>(this);
+        auto& scope = *context.resolutionScope;
+
+        if (scope.template contains<T>(key)) {
+            return scope.template get<T>(key);
+        }
+
+        auto value = parent_->resolve(context);
+        scope.template set<T>(key, value);
+
+        return value;
+    }
+
+#ifdef INVERSIFY_BINDING_INSPECTION
+    inline virtual std::string getResolverLabel() const override {
+        return std::string("resolution - ") + parent_->getResolverLabel();
+    }
+
+    inline virtual std::string getImplementationLabel() const override {
+        return parent_->getImplementationLabel();
+    }
+#endif
+
+private:
     ResolverPtr<T, SymbolTypes...> parent_;
 };
 

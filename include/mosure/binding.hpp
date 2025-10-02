@@ -18,6 +18,10 @@ public:
         resolver_ = std::make_shared<inversify::CachedResolver<T, SymbolTypes...>>(resolver_);
     }
 
+    void inResolutionScope() {
+        resolver_ = std::make_shared<inversify::ResolutionCachedResolver<T, SymbolTypes...>>(resolver_);
+    }
+
 #ifdef INVERSIFY_BINDING_INSPECTION
     auto getResolver() const {
         return resolver_;
