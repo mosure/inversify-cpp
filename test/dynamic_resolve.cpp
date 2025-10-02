@@ -1,5 +1,6 @@
 #include <functional>
 #include <memory>
+#include <utility>
 
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
@@ -11,6 +12,36 @@
 
 
 namespace inversify = mosure::inversify;
+
+struct ResolutionDependency {
+    explicit ResolutionDependency(int value) : value(value) { }
+
+    int value;
+};
+using ResolutionDependencyPtr = std::shared_ptr<ResolutionDependency>;
+
+struct ResolutionConsumer {
+    ResolutionConsumer(ResolutionDependencyPtr first, ResolutionDependencyPtr second)
+        : first(std::move(first)), second(std::move(second))
+    { }
+
+    ResolutionDependencyPtr first;
+    ResolutionDependencyPtr second;
+};
+using ResolutionConsumerPtr = std::shared_ptr<ResolutionConsumer>;
+
+namespace resolution_symbols {
+    using dependency = inversify::Symbol<ResolutionDependencyPtr>;
+    using consumer = inversify::Symbol<ResolutionConsumerPtr>;
+}
+
+template <>
+struct inversify::Injectable<ResolutionConsumer>
+    : inversify::Inject<
+        resolution_symbols::dependency,
+        resolution_symbols::dependency
+    >
+{ };
 
 SCENARIO("container resolves dynamic values", "[resolve]") {
 
@@ -154,6 +185,44 @@ SCENARIO("container resolves dynamic values", "[resolve]") {
 
             THEN("dependencies are unique") {
                 REQUIRE(fizz1 != fizz2);
+            }
+        }
+    }
+
+    GIVEN("A container with a resolution scoped dynamic binding") {
+        inversify::Container<
+            symbols::foo,
+            resolution_symbols::dependency,
+            resolution_symbols::consumer
+        > container;
+
+        container.bind<symbols::foo>().toConstantValue(10);
+
+        int factoryCount = 0;
+        container.bind<resolution_symbols::dependency>().toDynamicValue(
+            [&](auto& ctx) {
+                ++factoryCount;
+                auto foo = ctx.container.template get<symbols::foo>();
+
+                return std::make_shared<ResolutionDependency>(foo);
+            }
+        ).inResolutionScope();
+
+        container.bind<resolution_symbols::consumer>().to<ResolutionConsumer>();
+
+        WHEN("a graph resolves the dependency twice") {
+            auto consumer = container.get<resolution_symbols::consumer>();
+
+            THEN("the same dependency instance is reused within the graph") {
+                REQUIRE(consumer->first == consumer->second);
+                REQUIRE(factoryCount == 1);
+
+                AND_THEN("a new graph receives a new instance") {
+                    auto next = container.get<resolution_symbols::consumer>();
+
+                    REQUIRE(next->first != consumer->first);
+                    REQUIRE(factoryCount == 2);
+                }
             }
         }
     }
